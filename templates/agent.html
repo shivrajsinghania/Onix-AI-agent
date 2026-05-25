@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AI Agent</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/agent.css') }}">
+  </head>
+  <body>
+    <div class="container">
+      <h1>AI Agent</h1>
+      <div class="status">Autonomous Workflow Prototype</div>
+      <div class="input-box">
+        <input type="text" id="message" placeholder="Tell your agent what to do...">
+        <button onclick="sendMessage()">Send</button>
+      </div>
+      <pre id="output">Waiting for command...</pre>
+    </div>
+    
+    <script>
+      async function sendMessage() {
+        let message = document.getElementById("message").value.trim()
+        if (!message) return
+        document.getElementById("output").innerText = "Processing..."
+        let response = await fetch("/ask", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({message: message})
+        })
+        let data = await response.json()
+        document.getElementById("output").innerText = JSON.stringify(data, null, 2)
+      }
+    </script>
+  </body>
+</html>
