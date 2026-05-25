@@ -115,5 +115,23 @@ def ask():
         })
 
 
+@app.route("/history")
+def history():
+	with open("memory/history.json", "r") as file:
+		data = json.load(file)
+	return jsonify(data)
+	
+@app.route("/queue")
+def queue():
+	with open("memory/task_queue.json", "r") as file:
+		data = json.load(file)
+	return jsonify(data)
+	
+@app.route("/workflows")
+def workflows():
+	with open("memory/workflows.json", "r") as file:
+		data = json.load(file)
+	return jsonify(data)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
