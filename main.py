@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify, render_template
 
 from tools.ai import ask_ai
 from tools.whatsapp import send_message
-from tools.memory import save_history
+from tools.db_history import save_history
 from tools.search import search
 from tools.validator import validate_task
 from tools.queue_manager import (add_task, get_pending_tasks, mark_completed, mark_running, mark_failed, retry_task)
