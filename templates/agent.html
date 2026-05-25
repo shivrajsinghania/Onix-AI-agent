@@ -9,11 +9,20 @@
     <div class="container">
       <h1>AI Agent</h1>
       <div class="status">Autonomous Workflow Prototype</div>
-      <div class="input-box">
-        <input type="text" id="message" placeholder="Tell your agent what to do...">
-        <button onclick="sendMessage()">Send</button>
+      <div class="tabs">
+        <button onclick="showTab('chat')">Chat</button>
+        <button onclick="loadHistory()">History</button>
+        <button onclick="loadQueue()">Queue</button>
+        <button onclick="loadWorkflows()">Workflows</button>
       </div>
-      <pre id="output">Waiting for command...</pre>
+      <div id="chat-tab">
+        <div class="input-box">
+          <input type="text" id="message" placeholder="Tell your agent what to do...">
+          <button onclick="sendMessage()">Send</button>
+        </div>
+        <pre id="output">Waiting for command...</pre>
+      </div>
+      <div id="data-tab"></div>
     </div>
     
     <script>
@@ -28,6 +37,90 @@
         })
         let data = await response.json()
         document.getElementById("output").innerText = JSON.stringify(data, null, 2)
+      }
+      
+      function showTab(tab) {
+        if (tab === "chat") {
+          document.getElementById("chat-tab").style.display = "block"
+          document.getElementById("data-tab").innerHTML = ""
+        }
+      }
+      
+      async function loadHistory() {
+        document.getElementById("chat-tab").style.display = "none"
+        let response = await fetch("/history")
+        let data = await response.json()
+        renderData(data, "History")
+      }
+      
+      async function loadQueue() {
+        document.getElementById("chat-tab").style.display = "none"
+        let response = await fetch("/queue")
+        let data = await response.json()
+        renderData(data, "Queue")
+      }
+      
+      async function loadWorkflows() {
+        document.getElementById("chat-tab").style.display = "none"
+        let response = await fetch("/workflows")
+        let data = await response.json()
+        renderData(data, "Workflows")
+      }
+      
+      function renderData(data, title) {
+        let html = `<h2>${title}</h2>`
+        data.reverse().forEach(item => {
+          let humanText = ""
+          if (item.task) {
+            let task = item.task
+            if (task.action === "search") {
+              humanText = `🔎 Searched "${task.query}" on ${task.app}`
+            }
+            else if (task.action === "send_message") {
+              humanText = `📩 Sent message to ${task.target}`
+            }
+            else if (task.action === "open_website") {
+              humanText = `🌐 Opened ${task.url}`
+            }
+            else if (task.action === "observe_website") {
+              humanText = `👀 Observed ${task.url}`
+            }
+            else {
+              humanText = `⚙️ ${task.action}`
+            }
+          }
+          else if (item.tasks) {
+            humanText = `🧠 Workflow with ${item.tasks.length} steps`
+          }
+          let statusColor = "#94a3b8"
+          if (item.status === "completed") {
+            statusColor = "#22c55e"
+          }
+          else if (item.status === "failed") {
+            statusColor = "#ef4444"
+          }
+          else if (item.status === "running") {
+            statusColor = "#eab308"
+          }
+          html += `
+          <div class="card">
+          <div class="human-header">
+          ${humanText}
+          </div>
+          <div class="status-badge"
+          style="background:${statusColor}">
+          ${item.status || "stored"}
+          </div>
+          <details>
+          <summary>Raw JSON</summary>
+          <pre>
+          ${JSON.stringify(item, null, 2)}
+          </pre>
+          </details>
+          </div>
+          `
+        })
+        document.getElementById("data-tab").innerHTML = html
       }
     </script>
   </body>
