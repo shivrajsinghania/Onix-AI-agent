@@ -118,15 +118,49 @@ def ask():
 
 @app.route("/history")
 def history():
-	with open("memory/history.json", "r") as file:
-		data = json.load(file)
-	return jsonify(data)
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+
+    SELECT *
+
+    FROM history
+
+    ORDER BY id DESC
+
+    """)
+
+    rows = cursor.fetchall()
+
+    cursor.close()
+
+    conn.close()
+
+    data = []
+
+    for row in rows:
+
+        data.append({
+
+            "id": row[0],
+            "action": row[1],
+            "app": row[2],
+            "target": row[3],
+            "message": row[4],
+            "query": row[5],
+            "created_at": str(row[6])
+
+        })
+
+    return jsonify(data)
 	
 @app.route("/queue")
 def queue():
-	with open("memory/task_queue.json", "r") as file:
-		data = json.load(file)
-	return jsonify(data)
+
+    return jsonify([])
 	
 @app.route("/workflows")
 def workflows():
@@ -169,5 +203,6 @@ def workflows():
         })
 
     return jsonify(data)
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
