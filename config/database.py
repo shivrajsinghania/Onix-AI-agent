@@ -35,6 +35,11 @@ def create_tables():
     )
 
     """)
+    
+    cursor.execute("""
+    ALTER TABLE history
+    ADD COLUMN IF NOT EXISTS status TEXT
+    """)
 
     # TASK QUEUE
 
