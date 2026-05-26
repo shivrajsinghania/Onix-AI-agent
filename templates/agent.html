@@ -71,7 +71,7 @@
         let html = `<h2>${title}</h2>`
         data.forEach(item => {
           let humanText = ""
-          let task = item.task || item.workflow
+          let task = item.task || item.workflow || item
           // parse JSON string if needed
           if (typeof task === "string") {
             try {
@@ -118,6 +118,12 @@
           }
           else if (item.status === "running") {
             statusColor = "#eab308"
+          }
+          else if (item.status === "pending") {
+            statusColor = "#64748b"
+          }
+          else if (item.status === "permanently_failed") {
+            statusColor = "#dc2626"
           }
           html += `
           <div class="card">
