@@ -1,43 +1,110 @@
+from config.database import get_connection
 import json
+from datetime import datetime
 
-WORKFLOW_FILE = "memory/workflows.json"
 
-def load_workflows():
-	with open(WORKFLOW_FILE, "r") as file:
-		return json.load(file)
-		
-def save_workflows(workflows):
-	with open(WORKFLOW_FILE, "w") as file:
-		json.dump(workflows, file, indent=4)
-		
 def create_workflow(tasks):
-	workflows = load_workflows()
-	workflow = {
-	"id": len(workflows) + 1,
-	"status": "running",
-	"current_step": 0,
-	"tasks": tasks
-	}
-	workflows.append(workflow)
-	save_workflows(workflows)
-	return workflow
-	
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    workflow_data = json.dumps(tasks)
+
+    cursor.execute("""
+
+    INSERT INTO workflows (
+
+        workflow_json,
+        status,
+        current_step,
+        started_at
+
+    )
+
+    VALUES (%s, %s, %s, %s)
+
+    RETURNING id
+
+    """, (
+
+        workflow_data,
+        "running",
+        0,
+        datetime.now()
+
+    ))
+
+    workflow_id = cursor.fetchone()[0]
+
+    conn.commit()
+
+    cursor.close()
+
+    conn.close()
+
+    return {
+
+        "id": workflow_id,
+        "tasks": tasks
+    }
+
+
 def update_step(workflow_id, step):
-    
-    workflows = load_workflows()
-    
-    for workflow in workflows:
-        
-        if workflow["id"] == workflow_id:
-            workflow["current_step"] = step
 
-    save_workflows(workflows)
-    
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+
+    UPDATE workflows
+
+    SET current_step = %s
+
+    WHERE id = %s
+
+    """, (
+
+        step,
+        workflow_id
+
+    ))
+
+    conn.commit()
+
+    cursor.close()
+
+    conn.close()
+
+
 def complete_workflow(workflow_id):
-    workflows = load_workflows()
 
-    for workflow in workflows:
-        if workflow["id"] == workflow_id:
-            workflow["status"] = "completed"
+    conn = get_connection()
 
-    save_workflows(workflows)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+
+    UPDATE workflows
+
+    SET
+
+        status = %s,
+        completed_at = %s
+
+    WHERE id = %s
+
+    """, (
+
+        "completed",
+        datetime.now(),
+        workflow_id
+
+    ))
+
+    conn.commit()
+
+    cursor.close()
+
+    conn.close()
