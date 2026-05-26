@@ -46,24 +46,20 @@ Example:
 def ask_ai(prompt):
 
     data = {
-        "model": "llama3-70b-8192",
+    "model": "llama-3.1-8b-instant",
 
-        "messages": [
-            {
-                "role": "system",
-                "content": SYSTEM_PROMPT
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-
-        "temperature": 0,
-
-        "response_format": {
-            "type": "json_object"
+    "messages": [
+        {
+            "role": "system",
+            "content": SYSTEM_PROMPT
+        },
+        {
+            "role": "user",
+            "content": prompt
         }
+    ],
+
+    "temperature": 0
     }
 
     response = requests.post(
@@ -72,6 +68,19 @@ def ask_ai(prompt):
         json=data
     )
 
-    result = response.json()
+result = response.json()
 
-    return result["choices"][0]["message"]["content"]
+print(result)
+
+if "choices" not in result:
+    return json.dumps({
+        "workflow": [
+            {
+                "action": "search",
+                "app": "youtube",
+                "query": "fallback"
+            }
+        ]
+    })
+
+return result["choices"][0]["message"]["content"]
