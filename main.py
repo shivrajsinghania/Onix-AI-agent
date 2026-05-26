@@ -13,8 +13,10 @@ from tools.context_manager import (store_step_output, get_step_output)
 from tools.observer import observe_website
 from tools.browser_actions import (open_website, click_element, type_text, submit_form)
 from config.database import get_connection
+from config.database import init_db
 
 app = Flask(__name__)
+init_db()
 
 
 @app.route("/")
