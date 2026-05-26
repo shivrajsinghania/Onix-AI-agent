@@ -19,7 +19,7 @@ def ask_ai(prompt):
 
     data = {
 
-        "model": "llama-3.1-8b-instant",
+        "model": "llama3-70b-8192",
 
         "messages": [
 
@@ -40,6 +40,9 @@ AVAILABLE TOOLS:
 STRICT RULES:
 
 - Return ONLY valid JSON
+- Never use double quotes inside values
+- Never generate invalid escaping
+- Every JSON must be parseable by Python json.loads()
 - Never explain anything
 - Never invent extra tasks
 - Never assume user intentions
