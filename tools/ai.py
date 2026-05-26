@@ -73,7 +73,6 @@ result = response.json()
     print(result)
 
     if "choices" not in result:
-
         return json.dumps({
             "workflow": [
                 {
