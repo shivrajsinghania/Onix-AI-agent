@@ -307,7 +307,8 @@ def history():
             "target": row[3],
             "message": row[4],
             "query": row[5],
-            "created_at": str(row[6])
+            "status": row[6],
+            "created_at": str(row[7])
         })
 
     return jsonify(data)
@@ -368,7 +369,7 @@ def workflows():
             "current_step": row[3],
             "started_at": str(row[4]),
             "completed_at": str(row[5]),
-            "created_at": str(row[7])
+            "created_at": str(row[6])
         })
 
     return jsonify(data)
