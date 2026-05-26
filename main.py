@@ -160,7 +160,44 @@ def history():
 @app.route("/queue")
 def queue():
 
-    return jsonify([])
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+
+    SELECT *
+
+    FROM task_queue
+
+    ORDER BY id DESC
+
+    """)
+
+    rows = cursor.fetchall()
+
+    cursor.close()
+
+    conn.close()
+
+    data = []
+
+    for row in rows:
+
+        data.append({
+
+            "id": row[0],
+            "task": row[1],
+            "status": row[2],
+            "attempts": row[3],
+            "error": row[4],
+            "started_at": str(row[5]),
+            "completed_at": str(row[6]),
+            "created_at": str(row[7])
+
+        })
+
+    return jsonify(data)
 	
 @app.route("/workflows")
 def workflows():
