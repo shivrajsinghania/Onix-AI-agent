@@ -69,10 +69,23 @@
       
       function renderData(data, title) {
         let html = `<h2>${title}</h2>`
-        .forEach(item => {
+        data.forEach(item => {
           let humanText = ""
-          if (item.task) {
-            let task = item.task
+          let task = item.task || item.workflow
+          // parse JSON string if needed
+          if (typeof task === "string") {
+            try {
+              task = JSON.parse(task)
+            } catch (e) {
+              console.log("JSON parse failed")
+            }
+          }
+          // workflow array
+          if (Array.isArray(task)) {
+            humanText = `🧠 Workflow with ${task.length} steps`
+          }
+          // single task
+          else if (task) {
             if (task.action === "search") {
               humanText = `🔎 Searched "${task.query}" on ${task.app}`
             }
@@ -85,13 +98,17 @@
             else if (task.action === "observe_website") {
               humanText = `👀 Observed ${task.url}`
             }
+            else if (task.action === "type_text") {
+              humanText = `⌨️ Typed "${task.text}"`
+            }
+            else if (task.action === "click_element") {
+              humanText = `🖱️ Clicked ${task.element}`
+            }
             else {
               humanText = `⚙️ ${task.action}`
             }
           }
-          else if (item.tasks) {
-            humanText = `🧠 Workflow with ${item.tasks.length} steps`
-          }
+          
           let statusColor = "#94a3b8"
           if (item.status === "completed") {
             statusColor = "#22c55e"
@@ -107,7 +124,8 @@
           <div class="human-header">
           ${humanText}
           </div>
-          <div class="status-badge"
+          <div
+          class="status-badge"
           style="background:${statusColor}">
           ${item.status || "stored"}
           </div>
