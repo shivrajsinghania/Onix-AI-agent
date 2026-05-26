@@ -1,100 +1,247 @@
 import json
 
+from datetime import datetime
+
+from config.database import get_connection
+
+
 MAX_RETRIES = 3
-
-QUEUE_FILE = "memory/task_queue.json"
-
-
-def load_queue():
-
-    with open(QUEUE_FILE, "r") as file:
-
-        return json.load(file)
-
-
-def save_queue(queue):
-
-    with open(QUEUE_FILE, "w") as file:
-
-        json.dump(queue, file, indent=4)
 
 
 def add_task(task):
 
-    queue = load_queue()
+    conn = get_connection()
 
-    queue.append({
+    cursor = conn.cursor()
 
-        "task": task,
+    cursor.execute("""
 
-        "status": "pending",
+    INSERT INTO task_queue (
 
-        "attempts": 0,
+        task_json,
+        status,
+        attempts
 
-        "error": None
-    })
+    )
 
-    save_queue(queue)
+    VALUES (%s, %s, %s)
+
+    """, (
+
+        json.dumps(task),
+        "pending",
+        0
+
+    ))
+
+    conn.commit()
+
+    cursor.close()
+
+    conn.close()
 
 
 def get_pending_tasks():
 
-    queue = load_queue()
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+
+    SELECT *
+
+    FROM task_queue
+
+    WHERE status = 'pending'
+
+    ORDER BY id ASC
+
+    """)
+
+    rows = cursor.fetchall()
+
+    cursor.close()
+
+    conn.close()
 
     pending = []
 
-    for index, item in enumerate(queue):
+    for row in rows:
 
-        if item["status"] == "pending":
+        pending.append((
 
-            pending.append((index, item))
+            row[0],
+
+            {
+
+                "task": row[1],
+                "status": row[2],
+                "attempts": row[3],
+                "error": row[4]
+
+            }
+
+        ))
 
     return pending
 
 
-def mark_running(index):
+def mark_running(task_id):
 
-    queue = load_queue()
+    conn = get_connection()
 
-    queue[index]["status"] = "running"
+    cursor = conn.cursor()
 
-    save_queue(queue)
+    cursor.execute("""
+
+    UPDATE task_queue
+
+    SET
+
+        status = %s,
+        started_at = %s
+
+    WHERE id = %s
+
+    """, (
+
+        "running",
+        datetime.now(),
+        task_id
+
+    ))
+
+    conn.commit()
+
+    cursor.close()
+
+    conn.close()
 
 
-def mark_completed(index):
+def mark_completed(task_id):
 
-    queue = load_queue()
+    conn = get_connection()
 
-    queue[index]["status"] = "completed"
+    cursor = conn.cursor()
 
-    save_queue(queue)
+    cursor.execute("""
+
+    UPDATE task_queue
+
+    SET
+
+        status = %s,
+        completed_at = %s
+
+    WHERE id = %s
+
+    """, (
+
+        "completed",
+        datetime.now(),
+        task_id
+
+    ))
+
+    conn.commit()
+
+    cursor.close()
+
+    conn.close()
 
 
-def mark_failed(index, error):
+def mark_failed(task_id, error):
 
-    queue = load_queue()
+    conn = get_connection()
 
-    queue[index]["status"] = "failed"
+    cursor = conn.cursor()
 
-    queue[index]["error"] = str(error)
+    cursor.execute("""
 
-    queue[index]["attempts"] += 1
+    UPDATE task_queue
 
-    save_queue(queue)
+    SET
+
+        status = %s,
+        error = %s,
+        attempts = attempts + 1
+
+    WHERE id = %s
+
+    """, (
+
+        "failed",
+        str(error),
+        task_id
+
+    ))
+
+    conn.commit()
+
+    cursor.close()
+
+    conn.close()
 
 
-def retry_task(index):
+def retry_task(task_id):
 
-    queue = load_queue()
+    conn = get_connection()
 
-    task = queue[index]
+    cursor = conn.cursor()
 
-    if task["attempts"] < MAX_RETRIES:
+    cursor.execute("""
 
-        task["status"] = "pending"
+    SELECT attempts
+
+    FROM task_queue
+
+    WHERE id = %s
+
+    """, (
+
+        task_id,
+
+    ))
+
+    attempts = cursor.fetchone()[0]
+
+    if attempts < MAX_RETRIES:
+
+        cursor.execute("""
+
+        UPDATE task_queue
+
+        SET status = %s
+
+        WHERE id = %s
+
+        """, (
+
+            "pending",
+            task_id
+
+        ))
 
     else:
 
-        task["status"] = "permanently_failed"
+        cursor.execute("""
 
-    save_queue(queue)
+        UPDATE task_queue
+
+        SET status = %s
+
+        WHERE id = %s
+
+        """, (
+
+            "permanently_failed",
+            task_id
+
+        ))
+
+    conn.commit()
+
+    cursor.close()
+
+    conn.close()
