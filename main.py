@@ -218,20 +218,15 @@ def ask():
         
         for step, task in enumerate(tasks):
         	update_workflow_step(workflow_id, step)
-        	task["step"] = step
-        	add_task(task)
-        
-        for step, task in enumerate(tasks):
         	action = task["action"]
-        	
         	is_valid, reason = validate_task(task)
         	if not is_valid:
         		print(f"Task rejected: {reason}")
         		continue
+        	task_id = add_task(task)
+        	
         	try:
-        		task_id = add_task(task)
         		mark_running(task_id)
-        		
         		if action == "send_message":
         			target = task["target"]
         			message = task["message"]
@@ -250,7 +245,7 @@ def ask():
         		elif action == "open_website":
         			url = task["url"]
         			open_website(url)
-        			
+        		
         		elif action == "click_element":
         			element = task["element"]
         			click_element(element)
@@ -261,15 +256,17 @@ def ask():
         			
         		elif action == "submit_form":
         			submit_form()
-        		
-        		save_history(task)
+        			
+        		save_history(task, "completed")
         		mark_completed(task_id)
-        		complete_workflow(workflow_id)
-        	
+        		
         	except Exception as e:
         		mark_failed(task_id, e)
+        		save_history(task, "failed")
         		print(f"Execution failed: {e}")
         		
+        complete_workflow(workflow_id)
+        	
         return jsonify({
             "status": "success",
             "tasks": tasks
