@@ -9,11 +9,13 @@ def get_connection():
     return psycopg2.connect(DATABASE_URL)
 
 
-def init_db():
+def create_tables():
 
     conn = get_connection()
 
     cursor = conn.cursor()
+
+    # HISTORY
 
     cursor.execute("""
 
@@ -26,12 +28,15 @@ def init_db():
         target TEXT,
         message TEXT,
         query TEXT,
+        status TEXT,
 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
     )
 
     """)
+
+    # TASK QUEUE
 
     cursor.execute("""
 
@@ -42,13 +47,10 @@ def init_db():
         task_json JSONB,
 
         status TEXT,
-
         attempts INTEGER DEFAULT 0,
-
         error TEXT,
 
         started_at TIMESTAMP,
-
         completed_at TIMESTAMP,
 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -56,6 +58,8 @@ def init_db():
     )
 
     """)
+
+    # WORKFLOWS
 
     cursor.execute("""
 
@@ -66,14 +70,10 @@ def init_db():
         workflow_json JSONB,
 
         status TEXT,
-
         current_step INTEGER DEFAULT 0,
 
         started_at TIMESTAMP,
-
         completed_at TIMESTAMP,
-
-        duration TEXT,
 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
@@ -84,5 +84,4 @@ def init_db():
     conn.commit()
 
     cursor.close()
-
     conn.close()
