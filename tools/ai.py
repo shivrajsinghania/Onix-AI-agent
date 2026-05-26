@@ -70,17 +70,18 @@ def ask_ai(prompt):
 
 result = response.json()
 
-print(result)
+    print(result)
 
-if "choices" not in result:
-    return json.dumps({
-        "workflow": [
-            {
-                "action": "search",
-                "app": "youtube",
-                "query": "fallback"
-            }
-        ]
-    })
+    if "choices" not in result:
 
-return result["choices"][0]["message"]["content"]
+        return json.dumps({
+            "workflow": [
+                {
+                    "action": "search",
+                    "app": "youtube",
+                    "query": "fallback"
+                }
+            ]
+        })
+
+    return result["choices"][0]["message"]["content"]
