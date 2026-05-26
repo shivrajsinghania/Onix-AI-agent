@@ -285,21 +285,31 @@ def ask():
 def history():
 
     conn = get_connection()
-
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT *
+    SELECT
+        id,
+        action,
+        app,
+        target,
+        message,
+        query,
+        status,
+        created_at
     FROM history
     ORDER BY id DESC
     """)
 
     rows = cursor.fetchall()
+
     cursor.close()
     conn.close()
+
     data = []
 
     for row in rows:
+
         data.append({
             "id": row[0],
             "action": row[1],
