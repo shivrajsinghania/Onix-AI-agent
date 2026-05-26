@@ -1,3 +1,4 @@
+import json
 from flask import Flask, request, jsonify, render_template
 from datetime import datetime
 from tools.ai import ask_ai
