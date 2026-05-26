@@ -12,6 +12,7 @@ from tools.workflow_manager import (create_workflow, update_step, complete_workf
 from tools.context_manager import (store_step_output, get_step_output)
 from tools.observer import observe_website
 from tools.browser_actions import (open_website, click_element, type_text, submit_form)
+from config.database import get_connection
 
 app = Flask(__name__)
 
@@ -129,9 +130,44 @@ def queue():
 	
 @app.route("/workflows")
 def workflows():
-	with open("memory/workflows.json", "r") as file:
-		data = json.load(file)
-	return jsonify(data)
 
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+
+    SELECT *
+
+    FROM workflows
+
+    ORDER BY id DESC
+
+    """)
+
+    rows = cursor.fetchall()
+
+    cursor.close()
+
+    conn.close()
+
+    data = []
+
+    for row in rows:
+
+        data.append({
+
+            "id": row[0],
+            "workflow": row[1],
+            "status": row[2],
+            "current_step": row[3],
+            "started_at": str(row[4]),
+            "completed_at": str(row[5]),
+            "duration": row[6],
+            "created_at": str(row[7])
+
+        })
+
+    return jsonify(data)
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
