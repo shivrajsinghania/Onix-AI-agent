@@ -88,6 +88,10 @@
           let humanText = ""
           let task = item.task || item.workflow || item
           
+          if (typeof task === "string") {
+            task = JSON.parse(task)
+          }
+          
           // workflow array
           if (Array.isArray(task)) {
             humanText = `🧠 Workflow with ${task.length} steps`
