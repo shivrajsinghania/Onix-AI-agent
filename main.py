@@ -343,7 +343,7 @@ def queue():
     for row in rows:
         data.append({
             "id": row[0],
-            "task": row[1],
+            "task": json.loads(row[1]),
             "status": row[2],
             "attempts": row[3],
             "error": row[4],
@@ -374,7 +374,7 @@ def workflows():
     for row in rows:
         data.append({
             "id": row[0],
-            "workflow": row[1],
+            "workflow": json.loads(row[1]),
             "status": row[2],
             "current_step": row[3],
             "started_at": str(row[4]),
@@ -383,6 +383,72 @@ def workflows():
         })
 
     return jsonify(data)
+
+@app.route("/delete/<table>/<int:item_id>", methods=["DELETE"])
+def delete_item(table, item_id):
+	allowed_tables = ["history", "queue", "workflow"]
+	
+	if table not in allowed_tables:
+		return jsonify({
+		"status": "error",
+		"message": "Invalid table"
+		})
+		
+	table_mapping = {
+	"history": "history",
+	"queue": "task_queue",
+	"workflow": "workflows"
+	}
+	
+	real_table = table_mapping[table]
+	
+	conn = get_connection()
+	cursor = conn.cursor()
+	
+	query = f"DELETE FROM {real_table} WHERE id=%s"
+	
+	cursor.execute(query, (item_id, ))
+	
+	conn.commit()
+	cursor.close()
+	conn.close()
+	
+	return jsonify({
+	"status": "success "
+	})
+
+@app.route("/clear/<table>", methods=["DELETE"])
+def clear_table(table):
+	allowed_tables = ["history", "queue", "workflow"]
+	
+	if table not in allowed_tables:
+		return jsonify({
+		"status": "error",
+		"message": "Invalid table"
+		})
+		
+	table_mapping = {
+	"history": "history",
+	"queue": "task_queue",
+	"workflow": "workflows"
+	}
+	
+	real_table = table_mapping[table]
+	
+	conn = get_connection()
+	cursor = conn.cursor()
+	
+	query = f"DELETE FROM {real_table}"
+	
+	cursor.execute(query)
+	
+	conn.commit()
+	cursor.close()
+	conn.close()
+	
+	return jsonify({
+	"status": "success"
+	})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
