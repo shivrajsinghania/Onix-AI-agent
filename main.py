@@ -343,7 +343,7 @@ def queue():
     for row in rows:
         data.append({
             "id": row[0],
-            "task": json.loads(row[1]),
+            "task": row[1],
             "status": row[2],
             "attempts": row[3],
             "error": row[4],
@@ -374,7 +374,7 @@ def workflows():
     for row in rows:
         data.append({
             "id": row[0],
-            "workflow": json.loads(row[1]),
+            "workflow": row[1],
             "status": row[2],
             "current_step": row[3],
             "started_at": str(row[4]),
