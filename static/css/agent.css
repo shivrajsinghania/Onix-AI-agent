@@ -20,25 +20,43 @@ body {
     
     .input-box {
       display: flex;
+      align-items: flex-end;
       gap: 10px;
       margin-top: 20px;
     }
-    input {
+    textarea {
       flex: 1;
-      padding: 15px;
-      border: none;
-      border-radius: 10px;
       background: #1e293b;
       color: white;
-      font-size: 16px;
-    }
-    button {
-      padding: 15px 20px;
       border: none;
-      border-radius: 10px;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 15px;
+      font-family: Arial;
+      resize: none;
+      outline: none;
+      min-height: 55px;
+      max-height: 140px;
+      box-sizing: border-box;
+      transition: 0.2s;
+    }
+    textarea:focus {
+      box-shadow: 0 0 0 2px #38bdf8;
+    }
+    .send-btn {
+      width: 55px;
+      height: 55px;
+      border: none;
+      border-radius: 16px;
       background: #38bdf8;
-      color: black;
+      color: #0f172a;
+      font-size: 22px;
       font-weight: bold;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .send-btn:active {
+      transform: scale(0.96);
     }
     button:active {
       transform: scale(0.98);
@@ -61,16 +79,18 @@ body {
     }
     .tabs {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       margin-top: 20px;
       margin-bottom: 20px;
-      overflow-x: auto;
     }
     .tabs button {
       flex: 1;
       background: #1e293b;
       color: white;
-      min-width: 100px;
+      padding: 12px 8px;
+      font-size: 14px;
+      border-radius: 10px;
+      white-space: nowrap;
     }
     #data-tab {
       margin-top: 20px;
@@ -80,6 +100,7 @@ body {
       padding: 15px;
       border-radius: 10px;
       margin-bottom: 15px;
+      position: relative;
     }
     .card pre {
       white-space: pre-wrap;
@@ -109,4 +130,27 @@ body {
       color: #38bdf8;
       margin-bottom: 10px;
     }
-    
+    .delete-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .clear-btn {
+      background: #dc2626;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 8px;
+    }    
