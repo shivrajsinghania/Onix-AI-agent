@@ -17,8 +17,8 @@
       </div>
       <div id="chat-tab">
         <div class="input-box">
-          <input type="text" id="message" placeholder="Tell your agent what to do...">
-          <button onclick="sendMessage()">Send</button>
+          <textarea id="message" placeholder="Tell your agent what to do..."></textarea>
+          <button class="send-btn" onclick="sendMessage()">➤</button>
         </div>
         <pre id="output">Waiting for command...</pre>
       </div>
@@ -37,6 +37,7 @@
         })
         let data = await response.json()
         document.getElementById("output").innerText = JSON.stringify(data, null, 2)
+        document.getElementById("message").value = ""
       }
       
       function showTab(tab) {
@@ -68,18 +69,25 @@
       }
       
       function renderData(data, title) {
-        let html = `<h2>${title}</h2>`
+        let type = ""
+        if (title === "History") {
+          type = "history"
+        } else if (title === "Queue") {
+          type = "queue"
+        } else if (title === "Workflows") {
+          type = "workflow"
+        }
+      
+        let html = `
+        <div class="title-row">
+        <h2>${title}</h2>
+        <button class="clear-btn" onclick="clearAll('${type}')">Clear All</button>
+        </div>
+        `
         data.forEach(item => {
           let humanText = ""
           let task = item.task || item.workflow || item
-          // parse JSON string if needed
-          if (typeof task === "string") {
-            try {
-              task = JSON.parse(task)
-            } catch (e) {
-              console.log("JSON parse failed")
-            }
-          }
+          
           // workflow array
           if (Array.isArray(task)) {
             humanText = `🧠 Workflow with ${task.length} steps`
@@ -140,11 +148,55 @@
           <pre>
           ${JSON.stringify(item, null, 2)}
           </pre>
+          <button class="delete-btn" onclick="deleteItem(${item.id}, '${type}')">
+          🗑
+          </button>
           </details>
           </div>
           `
         })
         document.getElementById("data-tab").innerHTML = html
+      }
+      
+      async function deleteItem(id, type) {
+        let confirmed = confirm("Are you sure want to delete this item?")
+        if (!confirmed) {
+          return
+        }
+        
+        let response = await fetch(`/delete/${type}/${id}`, {
+          method: "DELETE"
+        })
+        
+        let data = await response.json()
+        
+        console.log(data)
+        
+        if (type === "history") {
+          loadHistory()
+        } else if (type === "queue") {
+          loadQueue()
+        } else if (type === "workflow") {
+          loadWorkflows()
+        }
+      }
+      
+      async function clearAll(type) {
+        let confirmed = confirm("Are you sure wanna delete this entire table?")
+        if (!confirmed) {
+          return
+        }
+        let response = await fetch(`/clear/${type}`, {
+          method: "DELETE"
+        })
+        
+        if (type === "history") {
+          loadHistory()
+        } else if (type === "queue") {
+          loadQueue()
+        } else if (type === "workflow") {
+          loadWorkflows()
+        }
       }
     </script>
   </body>
