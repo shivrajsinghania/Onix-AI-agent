@@ -6,7 +6,9 @@ from tools.whatsapp import send_message
 from tools.search import search
 from tools.validator import validate_task
 from tools.observer import observe_website
+from tools.analyzer import analyze_observation
 from tools.browser_actions import (open_website, click_element, type_text, submit_form)
+from tools.executor import execute_task
 from config.database import get_connection
 from config.database import create_tables
 
@@ -449,6 +451,40 @@ def clear_table(table):
 	return jsonify({
 	"status": "success"
 	})
+
+@app.route("/results")
+def results():
+	conn = get_connection()
+	cursor = conn.cursor()
+	
+	cursor.execute("""
+	SELECT *
+	FROM task_results
+	ORDER BY id DESC
+	""")
+	
+	rows = cursor.fetchall()
+	cursor.close()
+	conn.close()
+	
+	data = []
+	
+	for row in rows:
+		data.append({
+		"id": row[0],
+		"task_id": row[1],
+		"action": row[2],
+		"result": row[3],
+		"created_at": str(row[4])
+		})
+		
+	return jsonify(data)
+
+@app.route("/execute", methods=["POST"])
+def execute():
+	task = request.get_json()
+	result = execute_task(task)
+	return jsonify(result)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
