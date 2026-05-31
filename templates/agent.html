@@ -4,6 +4,8 @@
     <title>AI Agent</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/agent.css') }}">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#38bdf8">
   </head>
   <body>
     <div class="container">
@@ -41,7 +43,7 @@
         document.getElementById("message").value = ""
       }
       
-      function showTab(tab) {
+      function showTab(tab){
         if (tab === "chat") {
           document.getElementById("chat-tab").style.display = "block"
           document.getElementById("data-tab").innerHTML = ""
@@ -241,6 +243,17 @@
         } else if (type === "results") {
           loadResults()
         }
+      }
+    </script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/static/js/service-worker.js")
+        .then(() => {
+          console.log("Service Worker Registered");
+        })
+        .catch((error) => {
+          console.error("Service Worker Error:", error);
+        });
       }
     </script>
   </body>
