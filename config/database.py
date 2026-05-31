@@ -35,11 +35,6 @@ def create_tables():
     )
 
     """)
-    
-    cursor.execute("""
-    ALTER TABLE history
-    ADD COLUMN IF NOT EXISTS status TEXT
-    """)
 
     # TASK QUEUE
 
@@ -85,6 +80,21 @@ def create_tables():
     )
 
     """)
+
+    #Results table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS task_results(
+    id SERIAL PRIMARY KEY,
+    task_id INTEGER,
+    action TEXT,
+    result_json JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP    
+    )
+    """)
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
 
     conn.commit()
 
