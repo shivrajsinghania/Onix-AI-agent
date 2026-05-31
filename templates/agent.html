@@ -14,6 +14,7 @@
         <button onclick="loadHistory()">History</button>
         <button onclick="loadQueue()">Queue</button>
         <button onclick="loadWorkflows()">Workflows</button>
+        <button onclick="loadResults()">Results</button>
       </div>
       <div id="chat-tab">
         <div class="input-box">
@@ -66,6 +67,13 @@
         let response = await fetch("/workflows")
         let data = await response.json()
         renderData(data, "Workflows")
+      }
+      
+      async function loadResults() {
+        document.getElementById("chat-tab").style.display = "none"
+        let response = await fetch("/results")
+        let data = await response.json()
+        renderResults(data)
       }
       
       function renderData(data, title) {
@@ -162,6 +170,34 @@
         document.getElementById("data-tab").innerHTML = html
       }
       
+      function renderResults(data) {
+        let html = `
+        <div class="title-row">
+        <h2>Results</h2>
+        <button class="clear-btn" onclick="clearAll('results')">Clear All</button>
+        </div>
+        `
+        data.forEach(item => {
+          html += `
+          <div class="card">
+          <button class="delete-btn" onclick="deleteItem(${item.id}, 'results')">
+          🗑
+          </button>
+          <div class="human-header">
+          👀 ${item.action}
+          </div>
+          <div class="status-badge">
+          Stored
+          </div>
+          <pre>
+          ${JSON.stringify(item.result, null, 2)}
+          </pre>
+          </div>
+          `
+        })
+        document.getElementById("data-tab").innerHTML = html
+      }
+      
       async function deleteItem(id, type) {
         let confirmed = confirm("Are you sure want to delete this item?")
         if (!confirmed) {
@@ -182,6 +218,8 @@
           loadQueue()
         } else if (type === "workflow") {
           loadWorkflows()
+        } else if (type === "results") {
+          loadResults()
         }
       }
       
@@ -200,6 +238,8 @@
           loadQueue()
         } else if (type === "workflow") {
           loadWorkflows()
+        } else if (type === "results") {
+          loadResults()
         }
       }
     </script>
