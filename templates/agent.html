@@ -1,564 +1,626 @@
-/* ── Reset & base ─────────────────────────────────────── */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Onix</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/agent.css') }}">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#38bdf8">
+  </head>
+  <body>
 
-body {
-  background: #0f172a;
-  color: white;
-  font-family: Arial, sans-serif;
-  height: 100dvh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
+    <!-- Sidebar overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-/* ── Top bar ──────────────────────────────────────────── */
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background: #0f172a;
-  border-bottom: 1px solid #1e293b;
-  flex-shrink: 0;
-  z-index: 10;
-}
-.topbar-title {
-  font-size: 17px;
-  font-weight: bold;
-  color: #38bdf8;
-  flex: 1;
-  text-align: center;
-}
-.menu-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  width: 40px; height: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  border-radius: 10px;
-  padding: 8px;
-}
-.menu-btn span {
-  display: block;
-  width: 20px; height: 2px;
-  background: #94a3b8;
-  border-radius: 2px;
-  transition: 0.2s;
-}
-.menu-btn:hover span { background: white; }
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-profile">
+        <div class="profile-avatar">
+          <img src="/static/icon-192.png" alt="Onix">
+        </div>
+        <div class="profile-info">
+          <div class="profile-name">Onix Agent</div>
+          <div class="profile-sub">Autonomous AI</div>
+        </div>
+        <button class="settings-btn" onclick="openSettings()" title="Settings">
+          <!-- gear icon -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
 
-.new-chat-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  width: 40px; height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  color: #64748b;
-  transition: 0.15s;
-}
-.new-chat-btn:hover { background: #1e293b; color: #94a3b8; }
+      <div class="sidebar-section-label">History</div>
+      <div class="sidebar-content" id="sidebarContent">
+        <p class="sidebar-empty">Loading...</p>
+      </div>
 
+      <!-- View all history button -->
+      <div class="sidebar-footer">
+        <button class="sidebar-view-all" onclick="openSection('history')">View all history →</button>
+      </div>
+    </div>
 
-.sidebar-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  z-index: 100;
-}
-.sidebar-overlay.show { display: block; }
+    <!-- Settings modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeSettings()"></div>
+    <div class="settings-modal" id="settingsModal">
+      <div class="modal-header">
+        <span>Settings</span>
+        <button class="modal-close-btn" onclick="closeSettings()">✕</button>
+      </div>
+      <div class="modal-body">
+        <button class="modal-item" onclick="openSection('queue')">
+          <span class="modal-icon">📋</span>
+          <div>
+            <div class="modal-item-title">Queue</div>
+            <div class="modal-item-sub">Pending tasks</div>
+          </div>
+        </button>
+        <button class="modal-item" onclick="openSection('workflows')">
+          <span class="modal-icon">🧠</span>
+          <div>
+            <div class="modal-item-title">Workflows</div>
+            <div class="modal-item-sub">Saved automations</div>
+          </div>
+        </button>
+        <button class="modal-item" onclick="openSection('results')">
+          <span class="modal-icon">👀</span>
+          <div>
+            <div class="modal-item-title">Results</div>
+            <div class="modal-item-sub">Observation data</div>
+          </div>
+        </button>
+        <div class="modal-divider"></div>
+        <button class="modal-item modal-item-danger" onclick="fakeLogout()">
+          <span class="modal-icon">🚪</span>
+          <div>
+            <div class="modal-item-title">Logout</div>
+            <div class="modal-item-sub">Sign out of Onix</div>
+          </div>
+        </button>
+      </div>
+    </div>
 
-/* ── Sidebar ──────────────────────────────────────────── */
-.sidebar {
-  position: fixed;
-  top: 0; left: 0;
-  height: 100dvh;
-  width: 285px;
-  background: #111827;
-  z-index: 200;
-  transform: translateX(-100%);
-  transition: transform 0.26s ease;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid #1e293b;
-}
-.sidebar.open { transform: translateX(0); }
+    <!-- Top bar -->
+    <div class="topbar">
+      <button class="menu-btn" onclick="openSidebar()">
+        <span></span><span></span><span></span>
+      </button>
+      <span class="topbar-title" id="topbarTitle">Onix</span>
+      <button class="new-chat-btn" onclick="newChat()" title="New chat">
+        <!-- compose/new icon -->
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.37 2.63a2 2 0 1 1 2.83 2.83L12 14.5l-4 1 1-4 9.37-9.37z"/>
+        </svg>
+      </button>
+    </div>
 
-.sidebar-profile {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 20px 16px 16px;
-  border-bottom: 1px solid #1e293b;
-}
-.profile-avatar {
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #0ea5e9, #6366f1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-.profile-avatar img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  border-radius: 50%;
-}
-.profile-info { flex: 1; min-width: 0; }
-.profile-name {
-  font-size: 15px;
-  font-weight: bold;
-  color: #f1f5f9;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.profile-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+    <!-- Main area -->
+    <div class="main-area" id="mainArea">
+      <!-- Chat view (default) -->
+      <div id="chat-view">
+        <div id="chat-messages">
+          <div id="output" class="output-empty">
+            <div class="empty-icon">
+              <img src="/static/icon-192.png" alt="Onix">
+            </div>
+            <div class="empty-title">
+              What can I do for you?
+            </div>
+            <div class="empty-sub">
+              Type a command below to get started.
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Data view (history / queue / workflows / results) -->
+      <div id="data-view" style="display:none"></div>
+    </div>
 
-.settings-btn {
-  background: none;
-  border: none;
-  color: #64748b;
-  cursor: pointer;
-  padding: 7px;
-  border-radius: 8px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  transition: 0.15s;
-}
-.settings-btn:hover { background: #1e293b; color: #94a3b8; }
+    <!-- Input bar (hidden when on data views) -->
+    <div class="input-bar" id="inputBar">
+      <div class="input-box">
+        <textarea id="message" placeholder="Tell Onix what to do..." rows="1"
+          onkeydown="handleKey(event)"></textarea>
+        <button class="mic-btn" id="micButton" onclick="startVoiceInput()" title="Voice input">
+          <!-- mic icon -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+        <button class="send-btn" onclick="sendMessage()" title="Send">
+          <!-- send arrow icon -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
 
-.sidebar-section-label {
-  font-size: 11px;
-  font-weight: bold;
-  color: #475569;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 16px 16px 8px;
-}
-.sidebar-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0 10px 4px;
-}
-.sidebar-item {
-  padding: 10px 12px;
-  border-radius: 10px;
-  margin-bottom: 4px;
-  transition: background 0.15s;
-}
-.sidebar-item:hover { background: #1e293b; }
-.sidebar-item-label {
-  font-size: 14px;
-  color: #cbd5e1;
-  margin-bottom: 5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.sidebar-item-status {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  color: white;
-}
-.sidebar-empty {
-  color: #475569;
-  font-size: 14px;
-  text-align: center;
-  margin-top: 30px;
-}
-.sidebar-footer {
-  padding: 10px 16px 20px;
-  border-top: 1px solid #1e293b;
-}
-.sidebar-view-all {
-  width: 100%;
-  background: none;
-  border: 1px solid #334155;
-  color: #64748b;
-  font-size: 13px;
-  padding: 10px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: 0.15s;
-}
-.sidebar-view-all:hover { background: #1e293b; color: #94a3b8; }
+    <script>
+      // ─── State ─────────────────────────────────────────────
+      let sidebarOpen = false
+      let currentView = "chat" // "chat" | "data"
 
-/* ── Settings modal ───────────────────────────────────── */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.6);
-  z-index: 300;
-}
-.modal-overlay.show { display: block; }
+      // ─── Input bar visibility ──────────────────────────────
+      function showInputBar() {
+        document.getElementById("inputBar").style.display = "block"
+      }
+      function hideInputBar() {
+        document.getElementById("inputBar").style.display = "none"
+      }
 
-.settings-modal {
-  position: fixed;
-  bottom: -100%;
-  left: 0; right: 0;
-  background: #1e293b;
-  border-radius: 20px 20px 0 0;
-  z-index: 400;
-  transition: bottom 0.28s ease;
-  max-height: 70dvh;
-  overflow-y: auto;
-}
-.settings-modal.open { bottom: 0; }
+      // ─── Sidebar ───────────────────────────────────────────
+      function openSidebar() {
+        sidebarOpen = true
+        document.getElementById("sidebar").classList.add("open")
+        document.getElementById("sidebarOverlay").classList.add("show")
+        loadSidebarHistory()
+        history.pushState({ sidebar: true }, "")
+      }
 
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 20px 12px;
-  font-size: 16px;
-  font-weight: bold;
-  color: #f1f5f9;
-  border-bottom: 1px solid #334155;
-}
-.modal-close-btn {
-  background: none;
-  border: none;
-  color: #64748b;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-}
-.modal-close-btn:hover { background: #334155; color: white; }
+      function closeSidebar() {
+        if (!sidebarOpen) return
+        sidebarOpen = false
+        document.getElementById("sidebar").classList.remove("open")
+        document.getElementById("sidebarOverlay").classList.remove("show")
+        closeSettings()
+      }
 
-.modal-body { padding: 10px 12px 24px; }
-.modal-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  background: none;
-  border: none;
-  color: white;
-  padding: 14px 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.15s;
-}
-.modal-item:hover { background: #334155; }
-.modal-icon { font-size: 22px; flex-shrink: 0; }
-.modal-item-title { font-size: 15px; font-weight: bold; color: #f1f5f9; }
-.modal-item-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
-.modal-item-danger .modal-item-title { color: #f87171; }
-.modal-divider { height: 1px; background: #334155; margin: 8px 0; }
+      window.addEventListener("popstate", function(e) {
+        if (sidebarOpen) closeSidebar()
+      })
 
-/* ── Main scrollable area ─────────────────────────────── */
-.main-area {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px 16px 110px;
-  max-width: 700px;
-  width: 100%;
-  margin: 0 auto;
-}
+      // Swipe left to close sidebar
+      let touchStartX = 0, touchStartY = 0
+      document.getElementById("sidebar").addEventListener("touchstart", function(e) {
+        touchStartX = e.touches[0].clientX
+        touchStartY = e.touches[0].clientY
+      }, { passive: true })
+      document.getElementById("sidebar").addEventListener("touchend", function(e) {
+        let dx = e.changedTouches[0].clientX - touchStartX
+        let dy = Math.abs(e.changedTouches[0].clientY - touchStartY)
+        if (dx < -60 && dy < 80) {
+          closeSidebar()
+          history.back()
+        }
+      }, { passive: true })
 
-/* ── Chat empty state ─────────────────────────────────── */
-.output-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 55dvh;
-  text-align: center;
-  gap: 10px;
-}
-.empty-icon {
-  width: 72px; height: 72px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-bottom: 6px;
-  background: linear-gradient(135deg, #0ea5e9, #6366f1);
-}
-.empty-icon img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-}
-.empty-title { font-size: 20px; font-weight: bold; color: #e2e8f0; }
-.empty-sub { font-size: 14px; color: #64748b; max-width: 260px; }
+      // ─── Sidebar history loader ────────────────────────────
+      async function loadSidebarHistory() {
+        let content = document.getElementById("sidebarContent")
+        content.innerHTML = "<p class='sidebar-empty'>Loading...</p>"
+        try {
+          let response = await fetch("/history")
+          let data = await response.json()
+          if (!data.length) {
+            content.innerHTML = "<p class='sidebar-empty'>No history yet.</p>"
+            return
+          }
+          let html = ""
+          // show latest 10 only in sidebar
+          data.slice(0, 10).forEach(item => {
+            let task = item.task || item.workflow || item
+            if (typeof task === "string") { try { task = JSON.parse(task) } catch(e){} }
+            let label = "⚙️ Task"
+            if (Array.isArray(task)) label = `🧠 Workflow (${task.length} steps)`
+            else if (task && task.action === "search") label = `🔎 ${task.query}`
+            else if (task && task.action === "send_message") label = `📩 → ${task.target}`
+            else if (task && task.action === "open_website") label = `🌐 ${task.url}`
+            else if (task && task.action) label = `⚙️ ${task.action}`
+            let statusColor = item.status === "completed" ? "#22c55e"
+              : item.status === "failed" || item.status === "permanently_failed" ? "#ef4444"
+              : item.status === "running" ? "#eab308" : "#64748b"
+            html += `<div class="sidebar-item">
+              <div class="sidebar-item-label">${label}</div>
+              <span class="sidebar-item-status" style="background:${statusColor}">${item.status || "stored"}</span>
+            </div>`
+          })
+          content.innerHTML = html
+        } catch(e) {
+          content.innerHTML = "<p class='sidebar-empty'>Could not load history.</p>"
+        }
+      }
 
-/* ── Chat output ──────────────────────────────────────── */
-.output-result {
-  background: #1e293b;
-  padding: 16px;
-  border-radius: 14px;
-}
-.output-result pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  font-size: 14px;
-  line-height: 1.5;
-}
+      // ─── Settings modal ────────────────────────────────────
+      function openSettings() {
+        document.getElementById("settingsModal").classList.add("open")
+        document.getElementById("modalOverlay").classList.add("show")
+      }
+      function closeSettings() {
+        document.getElementById("settingsModal").classList.remove("open")
+        document.getElementById("modalOverlay").classList.remove("show")
+      }
 
-/* ── Processing animation ─────────────────────────────── */
-.processing-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  padding: 32px 0;
-}
-.processing-dots {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.processing-dots span {
-  display: block;
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  background: #38bdf8;
-  animation: pulse-dot 1.2s ease-in-out infinite;
-}
-.processing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.processing-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes pulse-dot {
-  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-  40% { transform: scale(1); opacity: 1; }
-}
-.processing-label {
-  font-size: 14px;
-  color: #64748b;
-  letter-spacing: 0.05em;
-}
+      function openSection(section) {
+        closeSettings()
+        closeSidebar()
+        if (history.state && history.state.sidebar) history.back()
+        if (section === "history") loadHistory()
+        else if (section === "queue") loadQueue()
+        else if (section === "workflows") loadWorkflows()
+        else if (section === "results") loadResults()
+      }
 
-/* ── Input bar ────────────────────────────────────────── */
-.input-bar {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  background: #0f172a;
-  border-top: 1px solid #1e293b;
-  padding: 10px 16px 16px;
-  z-index: 10;
-}
-.input-box {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  max-width: 700px;
-  margin: 0 auto;
-}
-textarea {
-  flex: 1;
-  background: #1e293b;
-  color: white;
-  border: none;
-  border-radius: 16px;
-  padding: 13px 15px;
-  font-size: 15px;
-  font-family: Arial;
-  resize: none;
-  outline: none;
-  min-height: 50px;
-  max-height: 140px;
-  transition: 0.2s;
-  line-height: 1.4;
-}
-textarea:focus { box-shadow: 0 0 0 2px #38bdf8; }
-textarea::placeholder { color: #475569; }
+      function fakeLogout() {
+        closeSettings()
+        closeSidebar()
+        alert("Logout coming soon!")
+      }
 
-.send-btn, .mic-btn {
-  width: 44px; height: 44px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.15s;
-}
-.send-btn {
-  background: #38bdf8;
-  color: #0f172a;
-}
-.send-btn:hover { background: #7dd3fc; }
-.send-btn:active { transform: scale(0.94); }
+      // ─── View switching ────────────────────────────────────
+      function showChatView() {
+        currentView = "chat"
+        document.getElementById("chat-view").style.display = "block"
+        document.getElementById("data-view").style.display = "none"
+        document.getElementById("topbarTitle").innerText = "Onix"
+        showInputBar()
+      }
 
-.mic-btn {
-  background: #1e293b;
-  color: #64748b;
-  border: 1px solid #334155;
-}
-.mic-btn:hover { background: #334155; color: #94a3b8; }
-.mic-btn:active { transform: scale(0.94); }
+      function showDataView(title) {
+        currentView = "data"
+        document.getElementById("chat-view").style.display = "none"
+        document.getElementById("data-view").style.display = "block"
+        document.getElementById("topbarTitle").innerText = title
+        hideInputBar()
+      }
 
-/* Mic states via JS classes */
-.mic-btn.mic-active {
-  background: #dc2626;
-  color: white;
-  border-color: #dc2626;
-  animation: mic-pulse 1s ease-in-out infinite;
-}
-.mic-btn.mic-processing {
-  background: #1e293b;
-  color: #38bdf8;
-  border-color: #38bdf8;
-}
-@keyframes mic-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.4); }
-  50% { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
-}
+      function hideEmptyState() {
+        let empty = document.getElementById("output")
+        if (empty) empty.style.display = "none"
+      }
 
-/* ── Data view: title row with back btn ───────────────── */
-.title-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-.title-row h2 { font-size: 18px; color: #f1f5f9; flex: 1; }
+      function newChat() {
+        let container = document.getElementById("chat-messages")
+        container.innerHTML = `
+          <div id="output" class="output-empty">
+            <div class="empty-icon">
+              <img src="/static/icon-192.png" alt="Onix">
+            </div>
+            <div class="empty-title">What can I do for you?</div>
+            <div class="empty-sub">Type a command below to get started.</div>
+          </div>
+        `
+        showChatView()
+        document.getElementById("message").focus()
+      }
 
-.back-btn {
-  background: none;
-  border: none;
-  color: #64748b;
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-  transition: 0.15s;
-}
-.back-btn:hover { background: #1e293b; color: #94a3b8; }
+      function addUserMessage(text){
+        let container = document.getElementById("chat-messages")
+        container.innerHTML += `
+        <div class="user-bubble">
+        ${text}
+        </div>
+        `
+      }
+      
+      function addOnixMessage(html){
+        let container = document.getElementById("chat-messages")
+        container.innerHTML += `
+        <div class="ai-bubble">
+        ${html}
+        </div>
+        `
+      }
+      
+      // ─── Human-readable task descriptions ─────────────────
+      function siteName(url) {
+        if (!url) return ""
+        try {
+          let host = new URL(url).hostname.replace(/^www\./, "")
+          let parts = host.split(".")
+          let name = parts[parts.length - 2] || host
+          return name.charAt(0).toUpperCase() + name.slice(1)
+        } catch(e) { return url }
+      }
 
-.clear-btn {
-  background: #dc2626;
-  color: white;
-  padding: 7px 14px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-size: 13px;
-  flex-shrink: 0;
-}
-.clear-btn:active { transform: scale(0.97); }
+      function capitalize(str) {
+        if (!str) return ""
+        return str.charAt(0).toUpperCase() + str.slice(1)
+      }
 
-/* ── Cards ────────────────────────────────────────────── */
-.card {
-  background: #1e293b;
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  position: relative;
-}
-.card pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  font-size: 13px;
-  margin-top: 8px;
-}
-.human-header {
-  font-size: 15px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  padding-right: 44px;
-}
-.status-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  color: white;
-  margin-bottom: 10px;
-}
-details { margin-top: 8px; }
-summary {
-  cursor: pointer;
-  color: #38bdf8;
-  font-size: 13px;
-  margin-bottom: 8px;
-}
-.delete-btn {
-  position: absolute;
-  top: 12px; right: 12px;
-  background: #ef4444;
-  color: white;
-  border: none;
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 14px;
-}
-#chat-messages {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    overflow-x: hidden;  /* ← add this */
-}
+      function describeTask(task) {
+        let a = task.action || ""
+        let app = task.app || ""
+        let target = task.target || ""
+        let url = task.url || ""
+        let query = task.query || ""
+        let text = task.text || ""
+        let element = task.element || ""
+        let platformName = capitalize(app)
+        let label = ""
 
-.user-bubble {
-    align-self: flex-end;
-    margin-left: auto;
-    background: #38bdf8;
-    color: #0f172a;
-    padding: 12px 16px;
-    border-radius: 18px 18px 4px 18px;
-    max-width: 80%;
-    font-size: 15px;
-    line-height: 1.5;
-}
+        if (a === "open_website") {
+          let name = siteName(url) || url
+          label = `🌐 Open ${name}`
+        } else if (a === "search") {
+          let where = platformName ? ` on ${platformName}` : ""
+          label = `🔍 Search${where} for "${query}"`
+        } else if (a === "send_message") {
+          let where = platformName ? ` on ${platformName}` : ""
+          label = `📩 Send message to ${target}${where}`
+        } else if (a === "observe_website") {
+          let name = siteName(url) || url
+          label = `👀 Observe ${name}`
+        } else if (a === "type_text") {
+          label = `⌨️ Type "${text}"`
+        } else if (a === "click_element") {
+          label = `🖱️ Click ${element}`
+        } else if (a === "take_screenshot") {
+          label = `📸 Take a screenshot`
+        } else if (a === "scroll") {
+          label = `📜 Scroll the page`
+        } else {
+          // Fallback: prettify snake_case
+          label = `⚙️ ${a.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())}`
+        }
 
-.ai-bubble {
-    align-self: flex-start;
-    margin-right: auto;
-    background: #1e293b;
-    padding: 16px;
-    border-radius: 4px 18px 18px 18px;
-    max-width: 92%;
-    font-size: 14px;
-    line-height: 1.6;
-    overflow-x: hidden;
-    word-break: break-word;
-}
+        return `<div class="task-label">${label}</div>`
+      }
 
-.ai-bubble pre {
-    white-space: pre-wrap;
-    word-break: break-all;
-    overflow-x: hidden;
-    font-size: 12px;
-}
+      // ─── Chat ──────────────────────────────────────────────
+      let isSending = false
+      async function sendMessage() {
+        if (isSending) return
+        let messageEl = document.getElementById("message")
+        let message = messageEl.value.trim()
+        if (!message) return
 
-.workflow-title {
-    font-size: 15px;
-    font-weight: bold;
-    color: #38bdf8;
-    margin-bottom: 10px;
-}
+        // Clear input instantly and lock
+        isSending = true
+        messageEl.value = ""
+        autoResize(messageEl)
 
-.task-item {
-    background: #0f172a;
-    border-radius: 10px;
-    padding: 11px 14px;
-    margin-bottom: 8px;
-}
+        showChatView()
+        hideEmptyState()
+        let loadingId = Date.now();
+        addUserMessage(message)
+        addOnixMessage(`
+        <div id="loading-${loadingId}" class="processing-wrap">
+          <div class="processing-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="processing-label">Processing…</div>
+        </div>
+        `)
 
-.task-label {
-    font-size: 14px;
-    color: #e2e8f0;
-    font-weight: 500;
-    line-height: 1.4;
-}
+        try {
+          let response = await fetch("/ask", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({message: message})
+          })
+          let data = await response.json()
+          let taskHtml = ""
+          data.tasks.forEach(task => {
+            taskHtml += `<div class="task-item">${describeTask(task)}</div>`
+          })
+
+          document.getElementById(`loading-${loadingId}`).parentElement.innerHTML = `
+          <h3 class="workflow-title">Workflow Created</h3>
+          ${taskHtml}
+          <details>
+          <summary>Raw JSON</summary>
+          <pre>${JSON.stringify(data,null,2)}</pre>
+          </details>
+          `
+        } catch(e) {
+          document.getElementById(`loading-${loadingId}`).parentElement.innerHTML = `
+          <div style="color:#f87171">Failed to process. Please try again.</div>
+          `
+        }
+
+        isSending = false
+      }
+
+      function handleKey(e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault()
+          sendMessage()
+        }
+      }
+
+      function autoResize(el) {
+        el.style.height = "auto"
+        el.style.height = Math.min(el.scrollHeight, 140) + "px"
+      }
+      document.getElementById("message").addEventListener("input", function() {
+        autoResize(this)
+      })
+
+      // ─── Data loaders ──────────────────────────────────────
+      async function loadHistory() {
+        showDataView("History")
+        let response = await fetch("/history")
+        let data = await response.json()
+        renderData(data, "History")
+      }
+
+      async function loadQueue() {
+        showDataView("Queue")
+        let response = await fetch("/queue")
+        let data = await response.json()
+        renderData(data, "Queue")
+      }
+
+      async function loadWorkflows() {
+        showDataView("Workflows")
+        let response = await fetch("/workflows")
+        let data = await response.json()
+        renderData(data, "Workflows")
+      }
+
+      async function loadResults() {
+        showDataView("Results")
+        let response = await fetch("/results")
+        let data = await response.json()
+        renderResults(data)
+      }
+
+      function backToChat() {
+        showChatView()
+      }
+
+      function renderData(data, title) {
+        let type = title === "History" ? "history"
+          : title === "Queue" ? "queue"
+          : title === "Workflows" ? "workflow" : ""
+
+        let html = `<div class="title-row">
+          <button class="back-btn" onclick="backToChat()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+          <h2>${title}</h2>
+          <button class="clear-btn" onclick="clearAll('${type}')">Clear All</button>
+        </div>`
+
+        if (!data.length) {
+          html += `<p style="color:#64748b;text-align:center;margin-top:40px">Nothing here yet.</p>`
+        }
+
+        data.forEach(item => {
+          let humanText = ""
+          let task = item.task || item.workflow || item
+          if (typeof task === "string") { try { task = JSON.parse(task) } catch(e){} }
+
+          if (Array.isArray(task)) humanText = `🧠 Workflow with ${task.length} steps`
+          else if (task) {
+            if (task.action === "search") humanText = `🔎 Searched "${task.query}" on ${task.app}`
+            else if (task.action === "send_message") humanText = `📩 Sent message to ${task.target}`
+            else if (task.action === "open_website") humanText = `🌐 Opened ${task.url}`
+            else if (task.action === "observe_website") humanText = `👀 Observed ${task.url}`
+            else if (task.action === "type_text") humanText = `⌨️ Typed "${task.text}"`
+            else if (task.action === "click_element") humanText = `🖱️ Clicked ${task.element}`
+            else humanText = `⚙️ ${task.action}`
+          }
+
+          let statusColor = item.status === "completed" ? "#22c55e"
+            : item.status === "failed" ? "#ef4444"
+            : item.status === "running" ? "#eab308"
+            : item.status === "pending" ? "#64748b"
+            : item.status === "permanently_failed" ? "#dc2626" : "#94a3b8"
+
+          html += `<div class="card">
+            <div class="human-header">${humanText}</div>
+            <div class="status-badge" style="background:${statusColor}">${item.status || "stored"}</div>
+            <details>
+              <summary>Raw JSON</summary>
+              <pre>${JSON.stringify(item, null, 2)}</pre>
+              <button class="delete-btn" onclick="deleteItem(${item.id}, '${type}')">🗑</button>
+            </details>
+          </div>`
+        })
+        document.getElementById("data-view").innerHTML = html
+      }
+
+      function renderResults(data) {
+        let html = `<div class="title-row">
+          <button class="back-btn" onclick="backToChat()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+          <h2>Results</h2>
+          <button class="clear-btn" onclick="clearAll('results')">Clear All</button>
+        </div>`
+
+        if (!data.length) {
+          html += `<p style="color:#64748b;text-align:center;margin-top:40px">Nothing here yet.</p>`
+        }
+
+        data.forEach(item => {
+          html += `<div class="card">
+            <button class="delete-btn" onclick="deleteItem(${item.id}, 'results')">🗑</button>
+            <div class="human-header">👀 ${item.action}</div>
+            <div class="status-badge">Stored</div>
+            <pre>${JSON.stringify(item.result, null, 2)}</pre>
+          </div>`
+        })
+        document.getElementById("data-view").innerHTML = html
+      }
+
+      async function deleteItem(id, type) {
+        if (!confirm("Delete this item?")) return
+        await fetch(`/delete/${type}/${id}`, { method: "DELETE" })
+        if (type === "history") loadHistory()
+        else if (type === "queue") loadQueue()
+        else if (type === "workflow") loadWorkflows()
+        else if (type === "results") loadResults()
+      }
+
+      async function clearAll(type) {
+        if (!confirm("Delete this entire table?")) return
+        await fetch(`/clear/${type}`, { method: "DELETE" })
+        if (type === "history") loadHistory()
+        else if (type === "queue") loadQueue()
+        else if (type === "workflow") loadWorkflows()
+        else if (type === "results") loadResults()
+      }
+
+      // ─── Voice input ───────────────────────────────────────
+      // Fix: use SpeechRecognition || webkitSpeechRecognition, fix boolean strings
+      let recognition = null
+
+      function startVoiceInput() {
+        const micButton = document.getElementById("micButton")
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+        if (!SpeechRecognition) {
+          alert("Speech recognition is not supported on this browser.")
+          return
+        }
+
+        // If already listening, stop
+        if (recognition) {
+          recognition.stop()
+          recognition = null
+          micButton.classList.remove("mic-active", "mic-processing")
+          return
+        }
+
+        recognition = new SpeechRecognition()
+        recognition.lang = "en-US"
+        recognition.continuous = false
+        recognition.interimResults = false
+
+        micButton.classList.add("mic-active")
+
+        recognition.onresult = function(event) {
+          micButton.classList.remove("mic-active")
+          micButton.classList.add("mic-processing")
+          const text = event.results[0][0].transcript
+          document.getElementById("message").value = text
+          autoResize(document.getElementById("message"))
+        }
+
+        recognition.onend = function() {
+          micButton.classList.remove("mic-active", "mic-processing")
+          recognition = null
+        }
+
+        recognition.onerror = function(event) {
+          console.error("Voice error:", event.error)
+          micButton.classList.remove("mic-active", "mic-processing")
+          recognition = null
+        }
+
+        recognition.start()
+      }
+    </script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/static/js/service-worker.js")
+          .then(() => console.log("Service Worker Registered"))
+          .catch(error => console.error("Service Worker Error:", error))
+      }
+    </script>
+  </body>
+</html>
