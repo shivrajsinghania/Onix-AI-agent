@@ -13,17 +13,74 @@ def get_connection():
 
 def create_tables():
     conn = get_connection()
-    cur = conn.cursor()
+    cursor = conn.cursor()
 
-    cur.execute("DROP TABLE IF EXISTS task_results CASCADE;")
-    cur.execute("DROP TABLE IF EXISTS workflows CASCADE;")
-    cur.execute("DROP TABLE IF EXISTS task_queue CASCADE;")
-    cur.execute("DROP TABLE IF EXISTS history CASCADE;")
-    cur.execute("DROP TABLE IF EXISTS users CASCADE;")
+    #USERS
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS users(
+    id SERIAL PRIMARY KEY,
+    email TEXT,
+    username TEXT UNIQUE,
+    password TEXT
+    )
+    """)
+    
+    # HISTORY
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS history(
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER,
+    action TEXT,
+    app TEXT,
+    target TEXT,
+    message TEXT,
+    query TEXT,
+    status TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    
+    # TASK QUEUE
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS task_queue(
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER,
+    task_json TEXT,
+    status TEXT,
+    attempts INTEGER DEFAULT 0,
+    error TEXT,
+    started_at TIMESTAMP,
+    completed_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    # WORKFLOWS
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS workflows(
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER,
+    workflow_json TEXT,
+    status TEXT,
+    current_step INTEGER DEFAULT 0,
+    started_at TIMESTAMP,
+    completed_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    
+    #Results table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS task_results(
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER,
+    task_id INTEGER,
+    action TEXT,
+    result_json TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
     
     conn.commit()
-    
-    print("All tables deleted")
-    
-    cur.close()
+    cursor.close()
     conn.close()
