@@ -17,7 +17,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = "mysecretkey"
 
-create_tables()
+try:
+    print("STARTING TABLE CREATION")
+    create_tables()
+    print("TABLE CREATION FINISHED")
+except Exception as e:
+    print("CREATE_TABLES ERROR:", e)
 
 
 # ================== FUNCTIONS ==================
