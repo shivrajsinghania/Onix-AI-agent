@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Signup-page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      width: 100%;
+      max-width: 380px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    label {
+      font-size: 13px;
+      color: #aaa;
+      display: block;
+      margin-bottom: 5px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      padding-right: 40px; /* space for icon */
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 14px;
+    }
+    input::placeholder {
+      color: #aaa;
+    }
+
+    /* ✅ Eye button clean style */
+    .eye-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      width: 20px;
+      height: 20px;
+      color: #aaa;
+    }
+    .eye-btn:hover {
+      color: #fff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 25px;
+      border: none;
+      background: linear-gradient(135deg, #4da6ff, #0066ff);
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+    button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 5px 15px rgba(0,102,255,0.5);
+    }
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 15px;
+      color: #aaa;
+      text-decoration: none;
+      font-size: 13px;
+    }
+    .back:hover {
+      color: #fff;
+    }
+    .star-1, .star-2, .star-3, .star-4 {
+      color: darkred;
+      font-weight: bold;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      padding: 12px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+    }
+    .success, .error {
+      animation: fade 0.3s ease-in;
+    }
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    </style>
+  </head>
+  <body>
+    
+    <div class="container">
+      
+      <h2>User Signup</h2>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <p class="{{ category }}">{{ msg }}</p>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}  
+      <form action="/submit" method="post">
+        <div class="input-group">
+          <label>Email: <span class="star-1">*</span></label>
+          <input type="email" name="email" value="{{ old.email if old else '' }}" placeholder="Enter email" required>
+        </div>
+        <div class="input-group">
+          <label>Username: <span class="star-2">*</span></label>
+          <input type="text" name="username" value="{{ old.username if old else '' }}" placeholder="Create a username" required>
+        </div>
+
+        <!-- PASSWORD -->
+        <div class="input-group">
+          <label>Password: <span class="star-3">*</span></label>
+          <div style="position: relative;">
+            <input type="password" id="password" name="password" minlength="6" placeholder="Create a password" required>
+            <svg class="eye-btn" onclick="togglePassword('password', this)" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z" stroke="currentColor" stroke-width="2"/>
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- CONFIRM PASSWORD -->
+        <div class="input-group">
+          <label>Confirm Password <span class="star-4">*</span></label>
+          <div style="position: relative;">
+            <input type="password" id="confirm_password" name="confirm_password" minlength="6" placeholder="Enter the same password" required>
+            <svg class="eye-btn" onclick="togglePassword('confirm_password', this)" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z" stroke="currentColor" stroke-width="2"/>
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+
+        <button type="submit">Next</button>
+      </form>
+      <a onclick="goBack(event)" class="back">← back</a>
+    </div>
+
+    <script>
+      function goBack(event) {
+        if (document.referrer) {
+          event.preventDefault();
+          history.back();
+        }
+      }
+
+      function togglePassword(id, el) {
+        let input = document.getElementById(id);
+
+        if (input.type === "password") {
+          input.type = "text";
+          el.innerHTML = `
+            <path d="M17.94 17.94A10.94 10.94 0 0112 19c-6 0-10-6-10-6a21.77 21.77 0 015.06-5.94M9.9 4.24A10.94 10.94 0 0112 5c6 0 10 6 10 6a21.77 21.77 0 01-4.06 5.94M1 1l22 22" stroke="currentColor" stroke-width="2"/>`;
+        } else {
+          input.type = "password";
+          el.innerHTML = `
+            <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z" stroke="currentColor" stroke-width="2"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>`;
+        }
+      }
+    </script>
+  </body>
+</html>
