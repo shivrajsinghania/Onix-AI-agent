@@ -51,7 +51,21 @@ body {
 }
 .menu-btn:hover span { background: white; }
 
-/* ── Sidebar overlay ──────────────────────────────────── */
+.new-chat-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 40px; height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: #64748b;
+  transition: 0.15s;
+}
+.new-chat-btn:hover { background: #1e293b; color: #94a3b8; }
+
+
 .sidebar-overlay {
   display: none;
   position: fixed;
@@ -489,4 +503,62 @@ summary {
   cursor: pointer;
   font-size: 14px;
 }
-    
+#chat-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-x: hidden;  /* ← add this */
+}
+
+.user-bubble {
+    align-self: flex-end;
+    margin-left: auto;
+    background: #38bdf8;
+    color: #0f172a;
+    padding: 12px 16px;
+    border-radius: 18px 18px 4px 18px;
+    max-width: 80%;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.ai-bubble {
+    align-self: flex-start;
+    margin-right: auto;
+    background: #1e293b;
+    padding: 16px;
+    border-radius: 4px 18px 18px 18px;
+    max-width: 92%;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    word-break: break-word;
+}
+
+.ai-bubble pre {
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-x: hidden;
+    font-size: 12px;
+}
+
+.workflow-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: #38bdf8;
+    margin-bottom: 10px;
+}
+
+.task-item {
+    background: #0f172a;
+    border-radius: 10px;
+    padding: 11px 14px;
+    margin-bottom: 8px;
+}
+
+.task-label {
+    font-size: 14px;
+    color: #e2e8f0;
+    font-weight: 500;
+    line-height: 1.4;
+}    
