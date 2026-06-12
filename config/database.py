@@ -25,5 +25,5 @@ def create_tables():
     
     print("All tables deleted")
     
-    cursor.close()
+    cur.close()
     conn.close()
