@@ -10,7 +10,7 @@ from tools.observer import observe_website
 from tools.analyzer import analyze_observation
 from tools.browser_actions import (open_website, click_element, type_text, submit_form)
 from tools.executor import execute_task
-from config.database import (get_connection, create_tables, DB_PATH)
+from config.database import (get_connection, create_tables, DATABASE_URL)
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # ================== APP ==================
