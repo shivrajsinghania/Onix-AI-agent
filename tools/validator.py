@@ -1,26 +1,21 @@
 from tools.tool_definitions import TOOLS
 
 def validate_task(task):
-
     action = task.get("action")
 
     if action not in TOOLS:
-
-        return False, "Invalid action"
+        return False, f"Unsupported action: {action}"
 
     tool = TOOLS[action]
 
-    app = task.get("app")
+    # research_service doesn't use an app field
+    if action != "research_service":
+        app = task.get("app")
+        if app not in tool["apps"]:
+            return False, f"Invalid app '{app}' for action '{action}'"
 
-    if app not in tool["apps"]:
-
-        return False, "Invalid app"
-
-    required_fields = tool["required_fields"]
-
-    for field in required_fields:
-
+    for field in tool["required_fields"]:
         if field not in task:
-            return False, f"Missing field: {field}"
+            return False, f"Missing required field: {field}"
 
     return True, "Valid task"
