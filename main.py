@@ -108,7 +108,7 @@ def create_chat_session(user_id, title):
     RETURNING id
     """, (user_id, title))
 
-    chat_session_id = cursor.fetchone()
+    chat_session_id = cursor.fetchone()[0]
 
     conn.commit()
     cursor.close()
@@ -403,9 +403,13 @@ def ask():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
-    user_data = request.get_json()
-    question = user_data["message"]
-    history = user_data.get("history", [])
+    user_data = request.get_json() or {}
+    question = user_data.get("message")
+    if not question:
+    	return jsonify({
+    	"error": "Message required"
+    	}), 400
+    history = user_data.get("history", [])[-15:]
     user_context = user_data.get("user_context", {})
     user_id = session["user_id"]
 
