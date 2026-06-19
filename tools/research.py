@@ -37,15 +37,9 @@ def _scrape_best(urls, service):
             obs = observe_website(url)
             content = obs.get("content", "")
             status = obs.get("status_code", 0)
-            pdf_count = obs.get("pdf_count", 0)
-            faq_count = obs.get("faq_count", 0)
 
             if status == 200 and len(content) > 400:
-                extras = []
-                if pdf_count: extras.append(f"{pdf_count} PDF(s)")
-                if faq_count: extras.append(f"{faq_count} FAQ page(s)")
-                extra_str = f" + {', '.join(extras)}" if extras else ""
-                print(f"[research] Scraped OK: {url} ({len(content)} chars{extra_str})")
+                print(f"[research] Scraped OK: {url} ({len(content)} chars)")
                 return url, obs
             else:
                 print(f"[research] Skipped {url}: status={status}, len={len(content)}")
@@ -76,7 +70,7 @@ def research_service(service, state, subtype=None):
             "analysis": None
         }
 
-    # ── Stage 2: Search → scrape + PDF/FAQ extraction ─────────────────────────
+    # ── Stage 2: Search → scrape official page--------
     search_query = knowledge.get("search_query") or f"{state} {service_label} official apply online"
     print(f"[research] Stage 2: SerpAPI query: '{search_query}'")
 
@@ -96,8 +90,8 @@ def research_service(service, state, subtype=None):
 
     print(f"[research] Candidate URLs: {candidate_urls[:4]}")
 
-    # observe_website now automatically finds and reads PDFs + FAQ pages inside
-    successful_url, observation = _scrape_best(candidate_urls[:5], service)
+    # observe_website 
+    successful_url, observation = _scrape_best(candidate_urls[:3], service)
 
     # ── Stage 3: Gemini merges everything ─────────────────────────────────────
     print("[research] Stage 3: Gemini merge...")
