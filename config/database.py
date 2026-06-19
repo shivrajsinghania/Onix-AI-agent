@@ -81,6 +81,29 @@ def create_tables():
     )
     """)
     
+    # CHAT SESSIONS
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS chat_sessions(
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER,
+    title TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    
+    # CHAT MESSAGES
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS chat_messages(
+    id SERIAL PRIMARY KEY,
+    session_id INTEGER,
+    user_id INTEGER,
+    role TEXT,
+    content TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    
     conn.commit()
     cursor.close()
     conn.close()
