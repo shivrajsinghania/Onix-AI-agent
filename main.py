@@ -403,7 +403,7 @@ def ask():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
 
-    user_data = request.get_json() or {}
+    user_data = request.get_json()
     question = user_data.get("message")
     if not question:
     	return jsonify({
@@ -486,6 +486,7 @@ def ask():
         # Collect results to return to frontend
         research_results = []
         observe_results = []
+        search_results = []
 
         for step, task in enumerate(tasks):
 
@@ -513,7 +514,9 @@ def ask():
                 elif action == "search":
                     app_name = task["app"]
                     query = task["query"]
-                    search(app_name, query)
+                    result = search(app_name, query)
+                    save_result(user_id, task_id, "search", result)
+                    search_results.append(result)
 
                 elif action == "observe_website":
                     url = task["url"]
@@ -584,6 +587,13 @@ def ask():
                 "assistant",
                 "json:" + json.dumps(full_response)
             )
+            return jsonify({**full_response, "session_id": chat_session_id})
+
+        # Return search result
+        if search_results and not research_results and not observe_results:
+            s = search_results[0]
+            full_response = {"status": "search", "tasks": tasks, "search": s}
+            save_chat_message(chat_session_id, user_id, "assistant", "json:" + json.dumps(full_response))
             return jsonify({**full_response, "session_id": chat_session_id})
 
         # Return observe result
