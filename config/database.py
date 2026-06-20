@@ -9,7 +9,7 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 # ================== DATABASE ==================
 
 def get_connection():
-    return psycopg2.connect(DATABASE_URL)
+    return psycopg2.connect(DATABASE_URL, timeout=10)
 
 def create_tables():
     conn = get_connection()
