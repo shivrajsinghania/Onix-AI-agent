@@ -422,7 +422,7 @@
         </div>`
 
         chatHistory.push({role: "user", content: subtypeLabel})
-        learnFromMessage(state)
+        if (state) userContext.state = state
 
         try {
           let response = await fetch("/research-subtype", {
@@ -522,7 +522,14 @@
               session_id: currentChatSessionId
             })
           })
-          let data = await response.json()
+          const contentType = response.headers.get("content-type") || ""
+          if (!contentType.includes("application/json")) {
+            const raw = await response.text()
+            throw new Error(
+              `Server returned non-JSON response.\n\nStatus: ${response.status}\n\n${raw.substring(0,500)}`
+            )
+          }
+          const data = await response.json()
           if (data.session_id) currentChatSessionId = data.session_id
 
           // If backend tells us to remember something, store it
@@ -610,31 +617,16 @@
             </div>
             `
             chatHistory.push({role: "assistant", content: `What type of ${data.service_name} do you need? Options: ${data.subtypes.map(s=>s.label).join(", ")}`})
-            let obs = data.observation || {}
-            let analysisText = obs.analysis || "No analysis available."
-            let contentPreview = obs.content ? obs.content.substring(0, 300) + "..." : ""
+
+          } else if (data.status === "search") {
+            let s = data.search || {}
             bubble.innerHTML = `
-            <div class="research-card">
-              <div class="rc-header">
-                <span class="rc-icon">👁️</span>
-                <div>
-                  <div class="rc-title">${obs.title || obs.url || "Website"}</div>
-                  <div class="rc-subtitle">Observation Result</div>
-                </div>
-              </div>
-              <div class="rc-row">
-                <span class="rc-label">🔗 URL</span>
-                <span class="rc-value" style="word-break:break-all;font-size:11px">${obs.url || ""}</span>
-              </div>
-              <div class="rc-section-title">🧠 AI Analysis</div>
-              <div class="rc-notes">${analysisText}</div>
-              <details style="margin-top:10px">
-                <summary style="color:#64748b;font-size:12px;cursor:pointer">Page Content Preview</summary>
-                <pre style="font-size:11px;color:#94a3b8;white-space:pre-wrap;margin-top:6px">${contentPreview}</pre>
-              </details>
+            <div class="ai-message">
+              🔎 Search complete. <a href="${s.url}" target="_blank" style="color:#60a5fa">${s.title || s.url}</a>
+              ${s.snippet ? `<div style="color:#94a3b8;font-size:12px;margin-top:4px">${s.snippet}</div>` : ""}
             </div>
             `
-            chatHistory.push({role: "assistant", content: `Observed ${obs.url}: ${analysisText.substring(0,100)}`})
+            chatHistory.push({role: "assistant", content: `Search result: ${s.title || s.url}`})
 
           } else {
             bubble.innerHTML = `
@@ -649,15 +641,20 @@
           }
 
         } catch(e) {
-          document.getElementById(`loading-${loadingId}`).parentElement.innerHTML = `
-          <div style="color:#f87171">❌ Network error: ${e.message}</div>
-          `
+          console.error("ASK ERROR:", e)
+          let loadingEl = document.getElementById(`loading-${loadingId}`)
+          if (loadingEl) {
+            loadingEl.parentElement.innerHTML = `
+            <div style="color:#f87171">
+            ❌ ${e.message}
+            </div>
+            `
+          }
+        } finally {
+          scrollToBottom()
+          isSending = false
         }
-        scrollToBottom()
-        isSending = false
       }
-
-      isSending = false
         
       function handleKey(e) {
         if (e.key === "Enter" && !e.shiftKey) {
