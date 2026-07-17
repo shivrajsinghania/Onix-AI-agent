@@ -10,7 +10,7 @@ def history():
         return jsonify({"error": "Unauthorized"}), 401
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, action, app, target, message, query, status, created_at FROM history WHERE user_id=? ORDER BY id DESC", (session["user_id"],))
+    cursor.execute("SELECT id, action, app, target, message, query, status, created_at FROM history WHERE user_id=%s ORDER BY id DESC", (session["user_id"],))
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -23,7 +23,7 @@ def queue():
         return jsonify({"error": "Unauthorized"}), 401
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM task_queue WHERE user_id=? ORDER BY id DESC", (session["user_id"],))
+    cursor.execute("SELECT * FROM task_queue WHERE user_id=%s ORDER BY id DESC", (session["user_id"],))
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -36,7 +36,7 @@ def workflows():
         return jsonify({"error": "Unauthorized"}), 401
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM workflows WHERE user_id=? ORDER BY id DESC", (session["user_id"],))
+    cursor.execute("SELECT * FROM workflows WHERE user_id=%s ORDER BY id DESC", (session["user_id"],))
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -54,7 +54,7 @@ def delete_item(table, item_id):
     real_table = allowed_tables[table]
     conn = get_connection()
     cursor = conn.cursor()
-    query = f"DELETE FROM {real_table} WHERE id=? AND user_id=?"
+    query = f"DELETE FROM {real_table} WHERE id=%s AND user_id=%s"
     cursor.execute(query, (item_id, session["user_id"]))
     conn.commit()
     cursor.close()
@@ -72,7 +72,7 @@ def clear_table(table):
     real_table = allowed_tables[table]
     conn = get_connection()
     cursor = conn.cursor()
-    query = f"DELETE FROM {real_table} WHERE user_id=?"
+    query = f"DELETE FROM {real_table} WHERE user_id=%s"
     cursor.execute(query, (session["user_id"],))
     conn.commit()
     cursor.close()
@@ -85,7 +85,7 @@ def results():
         return jsonify({"error": "Unauthorized"}), 401
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM task_results WHERE user_id=? ORDER BY id DESC", (session["user_id"],))
+    cursor.execute("SELECT * FROM task_results WHERE user_id=%s ORDER BY id DESC", (session["user_id"],))
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
