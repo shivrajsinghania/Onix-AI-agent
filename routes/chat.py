@@ -93,7 +93,7 @@ def chat_sessions():
     cursor = conn.cursor()
     cursor.execute("""
     SELECT id, title, created_at, updated_at FROM chat_sessions
-    WHERE user_id=? ORDER BY updated_at DESC
+    WHERE user_id=%s ORDER BY updated_at DESC
     """, (user_id,))
     rows = cursor.fetchall()
     cursor.close()
@@ -112,7 +112,7 @@ def chat_session_messages(chat_session_id):
     cursor = conn.cursor()
     cursor.execute("""
     SELECT role, content, created_at FROM chat_messages
-    WHERE session_id=? AND user_id=? ORDER BY id ASC
+    WHERE session_id=%s AND user_id=%s ORDER BY id ASC
     """, (chat_session_id, user_id))
     rows = cursor.fetchall()
     cursor.close()
