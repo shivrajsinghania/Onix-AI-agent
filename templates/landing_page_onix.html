@@ -1,28 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>ONIX</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="/static/manifest.json">
-  <meta name="theme-color" content="#38bdf8">
-  <link rel="stylesheet" href="/static/css/landing_page_onix.css">
+<meta charset="UTF-8">
+<title>ONIX</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#0b0d10">
+<link rel="icon" href="/static/icon-192.png">
+<style>
+  :root{
+    --bg:#0b0d10;
+    --panel:#15181c;
+    --line:#262b31;
+    --text:#e9e9e7;
+    --muted:#84898f;
+    --accent:#4f8f7a;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+  }
+
+  .card{
+    width:90%;
+    max-width:360px;
+    text-align:center;
+  }
+
+  .logo{
+    width:56px;
+    height:56px;
+    border-radius:14px;
+    margin-bottom:24px;
+  }
+
+  h1{
+    font-size:26px;
+    font-weight:600;
+    letter-spacing:-0.02em;
+    margin:0 0 8px;
+  }
+
+  .tagline{
+    color:var(--muted);
+    font-size:14.5px;
+    margin:0 0 40px;
+  }
+
+  .actions{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .btn{
+    display:block;
+    text-decoration:none;
+    padding:14px;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    border:1px solid transparent;
+    transition:background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  }
+
+  .btn.primary{
+    background:var(--accent);
+    color:#08110d;
+  }
+  .btn.primary:hover{ background:#5fa38c; }
+
+  .btn.secondary{
+    background:transparent;
+    border-color:var(--line);
+    color:var(--text);
+  }
+  .btn.secondary:hover{ border-color:var(--accent); }
+
+  .btn:active{ transform:scale(0.98); }
+
+  .footer{
+    margin-top:32px;
+    color:#54595f;
+    font-size:12.5px;
+  }
+
+  a:focus-visible, button:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
 </head>
 <body>
-  <div class="container">
-    <img src="/static/icon-192.png" class="logo">
+  <div class="card">
+    <img src="/static/icon-192.png" class="logo" alt="Onix">
     <h1>ONIX</h1>
-    <p class="tagline">
-      Autonomous AI Workflow Platform
-    </p>
-    
-    <div class="buttons">
-      <a href="/login-page" class="btn primary">Login</a>
-      <a href="/signup" class="btn secondary">Create Account</a>
+    <p class="tagline">Service requirements lookup for cyber cafés</p>
+
+    <div class="actions">
+      <a href="/login-page" class="btn primary">Log in</a>
+      <a href="/signup" class="btn secondary">Create account</a>
     </div>
-    
-    <p class="footer">
-      Secure • Personal • Autonomous
-    </p>
+
+    <p class="footer">Bihar &amp; Central government services</p>
   </div>
 </body>
 </html>
