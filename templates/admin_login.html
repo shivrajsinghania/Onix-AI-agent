@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, system-ui, sans-serif;
+      background: #0f172a;
+      color: #f1f5f9;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .box {
+      width: 100%;
+      max-width: 380px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 18px;
+      padding: 28px 26px;
+    }
+    .box h2 { margin: 0 0 4px; font-size: 21px; }
+    .sub { color: #64748b; font-size: 13px; margin-bottom: 18px; }
+    .flash {
+      background: rgba(248,113,113,0.1);
+      border: 1px solid #f87171;
+      color: #f87171;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 13.5px;
+      margin-bottom: 14px;
+    }
+    label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+    .field { margin-bottom: 14px; }
+    input {
+      width: 100%;
+      background: #0f172a;
+      color: #f1f5f9;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 11px 12px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    input:focus { border-color: #38bdf8; box-shadow: 0 0 0 2px rgba(56,189,248,0.15); }
+    button {
+      width: 100%;
+      background: #38bdf8;
+      color: #0f172a;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 14.5px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: background .15s;
+    }
+    button:hover { background: #7dd3fc; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Admin Login</h2>
+    <div class="sub">Sign in to manage service knowledge</div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="post">
+      <div class="field">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Username" required autofocus>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Password" required>
+      </div>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+</body>
+</html>
