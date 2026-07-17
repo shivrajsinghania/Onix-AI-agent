@@ -1,243 +1,332 @@
-import requests
+# ai.py
 import json
+import os
 import re
 import time
-from config.settings import GROQ_API_KEY
-from tools.tool_definitions import TOOLS
+from typing import Any, List, Optional
 
-url = "https://api.groq.com/openai/v1/chat/completions"
+import requests
 
-headers = {
-    "Authorization": f"Bearer {GROQ_API_KEY}",
-    "Content-Type": "application/json"
-}
+from config.settings import GROQ_API_KEY, GEMINI_API_KEY, GEMINI_MODEL_CHAT
 
-SYSTEM_PROMPT = f"""You are Onix, an autonomous digital task agent. You execute tasks — you do NOT have conversations.
+GEMINI_API_KEY = (GEMINI_API_KEY or "").strip()
+GEMINI_MODEL = (GEMINI_MODEL_CHAT or "gemini-3.1-flash-lite").strip()
+GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
 
-YOUR ONLY JOB: Convert user requests into JSON workflows. Execute immediately with available info.
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-════════ OUTPUT — always one of these 4 JSON shapes ════════
+SYSTEM_PROMPT = """
+You are Onix Chat Assistant.
 
-1. WORKFLOW — when you have enough info (even partial):
-{{"workflow": [{{"action": "...", ...fields}}]}}
+Onix is a Bihar-first government-service platform for cyber cafés.
+Chat mode is for explanation, troubleshooting, UI guidance, and general support.
+Task mode is for real service research and task execution.
 
-2. CLARIFICATION — ONLY when one critical field is truly missing (e.g. state for a certificate):
-{{"status": "need_clarification", "question": "one short question"}}
+Be direct, clear, and practical.
+Do not hallucinate features, services, or steps.
+If you are unsure, say so briefly and keep the answer useful.
 
-3. CONVERSATION — greetings, identity questions, thanks:
-{{"status": "conversation", "message": "brief reply"}}
+What you can do in chat mode:
+- explain what Onix can do
+- explain the difference between Chat mode and Task mode
+- help with UI, workflow, and troubleshooting
+- answer general questions about government services at a high level
 
-4. UNSUPPORTED — impossible with your tools:
-{{"status": "unsupported", "message": "brief explanation"}}
+What you must not do in chat mode:
+- do NOT browse websites
+- do NOT research government services
+- do NOT execute tasks
+- do NOT ask for state, Aadhaar, PAN, fees, or personal details for service lookup
+- do NOT create workflows
+- do NOT mention internal tools or hidden steps as if you will run them
 
-════════ ABSOLUTE RULES ════════
+If the user asks for research, documents, application steps, or service lookup, redirect them to Task mode.
+If the request is unclear, ask at most one short clarifying question.
+Do not ask a clarification question when the user is asking for a service lookup; send them to Task mode instead.
 
-- Output ONLY the JSON object. No extra text. No markdown.
-- NEVER ask about documents, fees, personal details, PAN numbers, Aadhaar, or anything the user needs to provide. That is NOT your job.
-- NEVER have a back-and-forth conversation about how to do a task. Just do it.
-- NEVER ask the same question twice. Check history first.
-- NEVER run observe_website when user is asking about a government service, scheme, or scholarship. observe_website is ONLY for "open/visit/read this specific website" requests.
-- If user gives a city or district instead of a state, MAP IT yourself — you know Indian geography. Never ask "which state is X in?". Examples: Jehanabad/Patna/Gaya/Muzaffarpur/Nalanda/Chapra/Bhagalpur/Darbhanga/Begusarai → Bihar. Rohini/Dwarka/Janakpuri → Delhi. Mumbai/Pune/Nagpur → Maharashtra. Lucknow/Kanpur/Agra/Varanasi/Noida → Uttar Pradesh. Ranchi/Dhanbad/Jamshedpur → Jharkhand. Jaipur/Jodhpur/Udaipur → Rajasthan. Ahmedabad/Surat → Gujarat. Kolkata/Howrah → West Bengal. Bhopal/Indore → Madhya Pradesh. Hyderabad → Telangana. Chennai/Coimbatore → Tamil Nadu. Bangalore/Bengaluru → Karnataka.
-- If user describes their personal situation to find services (e.g. "I'm 18, scored 93% in Bihar board, looking for scholarships"), treat it as research_service for that topic in their state.
-- You may ask AT MOST ONE clarifying question per user request, and only for the state/location which is truly required for research_service.
-- If the user says anything vague like "apply for something" — ask what service, not which state. Get the service first.
-- research_service needs: service + state. If state is in history, USE IT. Don't ask again.
-- For CENTRAL government schemes (PM schemes, Aadhaar, PAN, Voter ID, Passport, Ration Card, PMUY, PMJAY, PM Kisan, etc.) — state = "central". Do NOT ask for state.
-- Examples of central schemes: PMUY, PMJAY, PM Kisan, Ayushman Bharat, Aadhaar enrolment, Passport, PAN card (new/correction), Voter ID (national portal), Ration Card (state-specific, DO ask state)
-- If unsure whether something is central or state — use "central" and let the research pipeline figure it out
-- observe_website just needs a URL. Infer it ("nvidia" → nvidia.com, "pan card" → pan.utiitsl.com/PAN/).
-- After getting state once, remember it for the rest of the conversation.
-
-════════ TOOLS ════════
-{TOOLS}
-
-════════ STATE MEMORY RULE ════════
-If the user has mentioned their state in ANY previous message, never ask for it again.
-Scan the ENTIRE history before asking.
-Example: if user said "Bihar" two messages ago, state = bihar. Use it.
-
-════════ CONVERSATION replies ════════
-Only for: hi/hello, "what can you do", "who are you", thanks.
-Keep it to 2-3 sentences max. Never ask follow-up questions in conversation mode.
-
-════════ EXAMPLES ════════
-
-User: hi
-→ {{"status": "conversation", "message": "Hey! I'm Onix. I can research government certificates, search Google/YouTube, and read websites. What do you need?"}}
-
-User: apply for PMUY
-→ {{"workflow": [{{"action": "research_service", "service": "pmuy_pradhan_mantri_ujjwala_yojana", "state": "central"}}]}}
-
-User: apply for Ayushman Bharat
-→ {{"workflow": [{{"action": "research_service", "service": "ayushman_bharat_pmjay", "state": "central"}}]}}
-
-User: apply for passport
-→ {{"workflow": [{{"action": "research_service", "service": "passport", "state": "central"}}]}}
-
-User: apply for PAN card
-→ {{"workflow": [{{"action": "research_service", "service": "pan_card", "state": "central"}}]}}
-
-User: apply for ration card
-→ {{"status": "need_clarification", "question": "Which state are you in? Ration card is issued by state governments."}}
-
-User: I'm in 11th grade, scored 93% in Bihar board, looking for scholarships
-→ {{"workflow": [{{"action": "research_service", "service": "scholarship_11th_grade_bihar", "state": "bihar"}}]}}
-
-User: I live in Jehanabad and want to apply for income certificate
-→ {{"workflow": [{{"action": "research_service", "service": "income_certificate", "state": "bihar"}}]}}
-
-User: apply for scholarship in Bihar
-→ {{"status": "need_clarification", "question": "Which scholarship? (e.g. Post Matric, Mukhyamantri Kanya Utthan, 10th pass incentive, minority scholarship)"}}
-
-User: I wanna apply for income certificate in Bihar
-→ {{"workflow": [{{"action": "research_service", "service": "income_certificate", "state": "bihar"}}]}}
-
-User: I wanna apply for something
-→ {{"status": "need_clarification", "question": "What would you like to apply for? (e.g. income certificate, voter ID, residence certificate)"}}
-
-User: apply for voter id card
-→ {{"status": "need_clarification", "question": "Which state are you applying in?"}}
-
-[history shows user is from Bihar]
-User: apply for voter id card
-→ {{"workflow": [{{"action": "research_service", "service": "voter_id_card", "state": "bihar"}}]}}
-
-User: change pic on pan card
-→ {{"status": "need_clarification", "question": "Which state are you a resident of?"}}
-
-[history: state=bihar]
-User: change pic on pan card
-→ {{"workflow": [{{"action": "research_service", "service": "pan_card_photo_update", "state": "bihar"}}]}}
-
-User: observe nvidia robotics
-→ {{"workflow": [{{"action": "observe_website", "app": "browser", "url": "https://www.nvidia.com/en-us/industries/robotics/"}}]}}
-
-User: search cosmos 3 on google
-→ {{"workflow": [{{"action": "search", "app": "google", "query": "cosmos 3"}}]}}
-
-User: but what documents
-→ {{"status": "conversation", "message": "I research what documents are needed from official sources. Just tell me which service and state, and I'll find out for you."}}
-
-User: why do you need my PAN number
-→ {{"status": "conversation", "message": "I don't need your PAN number. I only find information from official websites — I never collect your personal data."}}
-"""
+Return ONLY one valid JSON object, with no markdown and no extra text.
+Use exactly one of these shapes:
+{"status":"conversation","message":"..."}
+{"status":"need_clarification","question":"..."}
+{"status":"unsupported","message":"..."}
+{"status":"offline","message":"..."}
+""".strip()
 
 
-def _extract_json(text):
+def _extract_json(text: str) -> Optional[Any]:
     """Try multiple strategies to extract valid JSON from LLM output."""
-    text = text.strip()
+    raw = (text or "").strip()
+    if not raw:
+        return None
 
-    # Strip markdown fences
-    if "```" in text:
-        parts = text.split("```")
+    if "```" in raw:
+        parts = raw.split("```")
         for part in parts:
             part = part.strip()
             if part.startswith("json"):
                 part = part[4:].strip()
-            if part.startswith("{"):
+            if part.startswith("{") or part.startswith("["):
                 try:
                     return json.loads(part)
-                except:
+                except Exception:
                     pass
 
-    # Direct parse
     try:
-        return json.loads(text)
-    except:
+        return json.loads(raw)
+    except Exception:
         pass
 
-    # Find first complete { ... } block
-    match = re.search(r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)?\}', text, re.DOTALL)
-    if match:
+    for match in re.finditer(r"\{.*?\}", raw, re.DOTALL):
+        chunk = match.group(0)
         try:
-            return json.loads(match.group())
-        except:
-            pass
-
-    # Broader search
-    match = re.search(r'\{.*\}', text, re.DOTALL)
-    if match:
-        try:
-            return json.loads(match.group())
-        except:
-            pass
+            return json.loads(chunk)
+        except Exception:
+            continue
 
     return None
 
 
-def ask_ai(prompt, history=None, user_context=None):
-    # Build system prompt — inject remembered context at the top
-    system = SYSTEM_PROMPT
-    if user_context:
-        context_lines = []
-        if user_context.get("state"):
-            context_lines.append(f"REMEMBERED: User's state is '{user_context['state']}'. Do NOT ask for state again.")
-        if user_context.get("name"):
-            context_lines.append(f"REMEMBERED: User's name is '{user_context['name']}'.")
-        if context_lines:
-            system = "CONTEXT FROM MEMORY:\n" + "\n".join(context_lines) + "\n\n" + system
+def _remembered_context(user_context: Optional[dict]) -> str:
+    if not user_context:
+        return ""
 
+    context_lines: List[str] = []
+    if user_context.get("name"):
+        context_lines.append(f"User name: {user_context['name']}")
+    if user_context.get("state"):
+        context_lines.append(f"User state: {user_context['state']}")
+
+    if not context_lines:
+        return ""
+
+    return "CONTEXT FROM MEMORY:\n" + "\n".join(context_lines) + "\n\n"
+
+
+def _normalize_history(history: Optional[list]) -> List[dict]:
+    normalized: List[dict] = []
+    for turn in history or []:
+        role = (turn.get("role") or "").strip().lower()
+        content = (turn.get("content") or "").strip()
+        if not content:
+            continue
+        if role == "assistant":
+            role = "model"
+        elif role != "user":
+            continue
+        normalized.append(
+            {
+                "role": role,
+                "parts": [{"text": content}],
+            }
+        )
+    return normalized[-20:]
+
+
+def _collect_text_from_gemini(result: dict) -> str:
+    candidates = result.get("candidates") or []
+    for candidate in candidates:
+        content = candidate.get("content") or {}
+        parts = content.get("parts") or []
+        texts = []
+        for part in parts:
+            if isinstance(part, dict) and part.get("text"):
+                texts.append(part["text"])
+        text = "".join(texts).strip()
+        if text:
+            return text
+
+    for candidate in candidates:
+        if candidate.get("outputText"):
+            return str(candidate["outputText"]).strip()
+
+    return ""
+
+
+def _normalize_response_object(parsed: Any) -> dict:
+    if isinstance(parsed, str):
+        return {"status": "conversation", "message": parsed}
+
+    if not isinstance(parsed, dict):
+        return {"status": "conversation", "message": str(parsed)}
+
+    status = str(parsed.get("status") or "").strip().lower()
+    message = parsed.get("message")
+    question = parsed.get("question")
+
+    if not status:
+        if question:
+            status = "need_clarification"
+        else:
+            status = "conversation"
+
+    if status not in {"conversation", "need_clarification", "unsupported", "offline"}:
+        status = "conversation"
+
+    if status == "need_clarification":
+        question_text = question or message or "Can you clarify your request?"
+        return {"status": "need_clarification", "question": str(question_text).strip()}
+
+    if status in {"unsupported", "offline"}:
+        message_text = message or "I cannot handle that request right now."
+        return {"status": status, "message": str(message_text).strip()}
+
+    message_text = message or parsed.get("answer") or parsed.get("text") or parsed.get("content")
+    if not message_text:
+        message_text = "How can I help you?"
+    return {"status": "conversation", "message": str(message_text).strip()}
+
+
+def _call_gemini(prompt: str, history: Optional[list], user_context: Optional[dict]) -> dict:
+    if not GEMINI_API_KEY:
+        raise RuntimeError("Gemini API key is not configured")
+
+    system_text = _remembered_context(user_context) + SYSTEM_PROMPT
+    contents = _normalize_history(history)
+    contents.append(
+        {
+            "role": "user",
+            "parts": [{"text": prompt}],
+        }
+    )
+
+    payload = {
+        "systemInstruction": {
+            "parts": [{"text": system_text}]
+        },
+        "contents": contents,
+        "generationConfig": {
+            "temperature": 0.2,
+            "topP": 0.9,
+            "maxOutputTokens": 500,
+        },
+    }
+
+    response = requests.post(
+        GEMINI_URL,
+        headers={
+            "Content-Type": "application/json",
+            "x-goog-api-key": GEMINI_API_KEY,
+        },
+        json=payload,
+        timeout=30,
+    )
+
+    if response.status_code == 429:
+        raise requests.exceptions.HTTPError("Gemini rate limited", response=response)
+
+    response.raise_for_status()
+    result = response.json()
+    content = _collect_text_from_gemini(result)
+    if not content:
+        raise RuntimeError("Gemini returned an empty response")
+
+    parsed = _extract_json(content)
+    if parsed is None:
+        return {"status": "conversation", "message": content.strip()}
+
+    return _normalize_response_object(parsed)
+
+
+def _call_groq(prompt: str, history: Optional[list], user_context: Optional[dict]) -> dict:
+    if not GROQ_API_KEY:
+        raise RuntimeError("Groq API key is not configured")
+
+    system = _remembered_context(user_context) + SYSTEM_PROMPT
     messages = [{"role": "system", "content": system}]
 
-    if history:
-        for turn in history:
-            messages.append({
-                "role": turn["role"],
-                "content": turn["content"]
-            })
+    for turn in history or []:
+        role = (turn.get("role") or "").strip().lower()
+        content = (turn.get("content") or "").strip()
+        if not content:
+            continue
+        if role not in {"user", "assistant"}:
+            continue
+        messages.append(
+            {
+                "role": "assistant" if role == "assistant" else "user",
+                "content": content,
+            }
+        )
 
     messages.append({"role": "user", "content": prompt})
 
-    models = [
-        "llama-3.1-8b-instant",
-        "llama3-8b-8192",
-    ]
+    response = requests.post(
+        GROQ_URL,
+        headers={
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "model": os.getenv("GROQ_CHAT_MODEL", "llama-3.1-8b-instant"),
+            "messages": messages,
+            "max_tokens": 500,
+            "temperature": 0.2,
+        },
+        timeout=30,
+    )
 
-    last_error = None
+    if response.status_code == 429:
+        raise requests.exceptions.HTTPError("Groq rate limited", response=response)
 
-    for model in models:
-        try:
-            data = {
-                "model": model,
-                "messages": messages,
-                "max_tokens": 300,
-                "temperature": 0.1
-            }
+    response.raise_for_status()
+    result = response.json()
+    choices = result.get("choices") or []
+    if not choices:
+        raise RuntimeError("Groq returned no choices")
 
-            response = requests.post(
-                url,
-                headers=headers,
-                json=data,
-                timeout=20
-            )
+    content = ((choices[0].get("message") or {}).get("content") or "").strip()
+    if not content:
+        raise RuntimeError("Groq returned an empty response")
 
-            if response.status_code == 429:
-                last_error = "rate_limited"
-                time.sleep(1)
-                continue
+    parsed = _extract_json(content)
+    if parsed is None:
+        return {"status": "conversation", "message": content}
 
-            response.raise_for_status()
-            result = response.json()
-            content = result["choices"][0]["message"]["content"].strip()
+    return _normalize_response_object(parsed)
 
-            parsed = _extract_json(content)
-            if parsed:
-                return json.dumps(parsed)
 
-            # Wrap unparseable text as conversation — never fail visibly
-            return json.dumps({
+def ask_ai(prompt, history=None, user_context=None):
+    """
+    Return a JSON string describing the assistant response.
+
+    Preferred path:
+    1) Gemini 3.1 Flash-Lite
+    2) Groq fallback
+    3) Offline message if both fail
+    """
+    prompt = (prompt or "").strip()
+    if not prompt:
+        return json.dumps(
+            {
                 "status": "conversation",
-                "message": content
-            })
+                "message": "How can I help you?",
+            }
+        )
 
+    providers = []
+    if GEMINI_API_KEY:
+        providers.append("gemini")
+    if GROQ_API_KEY:
+        providers.append("groq")
+
+    for provider in providers:
+        try:
+            if provider == "gemini":
+                response_obj = _call_gemini(prompt, history, user_context)
+            else:
+                response_obj = _call_groq(prompt, history, user_context)
+            return json.dumps(response_obj, ensure_ascii=False)
         except requests.exceptions.HTTPError:
-            last_error = "http_error"
             continue
         except requests.exceptions.Timeout:
-            last_error = "timeout"
+            continue
+        except Exception:
             continue
 
-    return json.dumps({
-        "status": "conversation",
-        "message": "I'm having trouble connecting right now. Please try again!"
-    })
+    return json.dumps(
+        {
+            "status": "offline",
+            "message": "I'm having trouble connecting right now. Please try again!",
+        },
+        ensure_ascii=False,
+    )
