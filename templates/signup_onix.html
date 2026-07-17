@@ -1,205 +1,475 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Signup-page</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "Segoe UI", sans-serif;
-    }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signup - Onix</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", sans-serif; }
     body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
       background: linear-gradient(135deg, #0f172a, #1e293b);
       color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
     }
-    .container {
+    .card {
       width: 100%;
-      max-width: 380px;
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(15px);
-      border-radius: 20px;
-      padding: 25px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+      max-width: 400px;
+      padding: 24px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.35);
     }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      font-weight: 500;
-    }
-    .input-group {
-      margin-bottom: 15px;
-    }
-    label {
-      font-size: 13px;
-      color: #aaa;
-      display: block;
-      margin-bottom: 5px;
-    }
-    input {
+    h2 { text-align: center; font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .subtitle { text-align: center; color: #aab4c5; font-size: 13px; margin-bottom: 22px; }
+
+    .field { margin-bottom: 14px; }
+    label { display: block; margin-bottom: 6px; font-size: 13px; color: #aab4c5; }
+
+    .input-wrap { position: relative; }
+    .input {
       width: 100%;
-      padding: 10px;
-      padding-right: 40px; /* space for icon */
-      border-radius: 10px;
+      padding: 12px 14px;
       border: none;
       outline: none;
-      background: rgba(255,255,255,0.08);
+      border-radius: 14px;
+      background: rgba(255,255,255,.08);
       color: #fff;
       font-size: 14px;
+      transition: .2s ease;
     }
-    input::placeholder {
-      color: #aaa;
+    .input:focus { background: rgba(255,255,255,.11); box-shadow: 0 0 0 2px rgba(77,166,255,.25); }
+    .input::placeholder { color: #96a2b6; }
+
+    .error-text {
+      min-height: 18px;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #ff9aa6;
+    }
+    .hint-text {
+      min-height: 18px;
+      margin-top: 6px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .status-ok { color: #7ee0a6; }
+    .status-bad { color: #ff9aa6; }
+
+    .email-box {
+      display: flex;
+      align-items: stretch;
+      width: 100%;
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(255,255,255,.08);
+      transition: .2s ease;
+    }
+    .email-box:focus-within { box-shadow: 0 0 0 2px rgba(77,166,255,.25); background: rgba(255,255,255,.11); }
+    .email-box input {
+      flex: 1;
+      padding: 12px 14px;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: #fff;
+      font-size: 14px;
+      min-width: 0;
+    }
+    .email-box input::placeholder { color: #96a2b6; }
+    .suffix {
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      white-space: nowrap;
+      color: #d7e1f1;
+      font-size: 13px;
+      background: rgba(255,255,255,.05);
+      border-left: 1px solid rgba(255,255,255,.08);
+      user-select: none;
     }
 
-    /* ✅ Eye button clean style */
+    .input-with-icon { position: relative; }
+    .input-with-icon .input { padding-right: 42px; }
     .eye-btn {
       position: absolute;
-      right: 10px;
+      right: 12px;
       top: 50%;
       transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: #aab4c5;
       cursor: pointer;
-      width: 20px;
-      height: 20px;
-      color: #aaa;
-    }
-    .eye-btn:hover {
-      color: #fff;
     }
 
-    button {
+    .username-check {
+      min-height: 18px;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+
+    .bars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .bars span {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      transition: .2s ease;
+    }
+    .bars.weak span:nth-child(1) { background: #ef4444; }
+    .bars.medium span:nth-child(1),
+    .bars.medium span:nth-child(2) { background: #f59e0b; }
+    .bars.strong span { background: #22c55e; }
+
+    .strength-label {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #aab4c5;
+    }
+
+    .button {
       width: 100%;
-      padding: 12px;
-      border-radius: 25px;
-      border: none;
-      background: linear-gradient(135deg, #4da6ff, #0066ff);
-      color: white;
-      font-size: 14px;
-      cursor: pointer;
-      transition: 0.3s;
       margin-top: 10px;
+      padding: 12px 14px;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #4da6ff, #0066ff);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: .2s ease;
     }
-    button:hover {
-      transform: scale(1.03);
-      box-shadow: 0 5px 15px rgba(0,102,255,0.5);
+    .button:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(0,102,255,.3); }
+    .button:disabled { opacity: .7; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      display: none;
     }
-    .back {
+    .loading .spinner { display: inline-block; }
+
+    .footer-link {
       display: block;
       text-align: center;
-      margin-top: 15px;
-      color: #aaa;
+      margin-top: 14px;
+      color: #aab4c5;
       text-decoration: none;
       font-size: 13px;
     }
-    .back:hover {
+    .footer-link:hover { color: #fff; }
+
+    .general-error {
+      display: none;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,90,90,.12);
+      border: 1px solid rgba(255,90,90,.2);
+      color: #ffb4bd;
+      font-size: 13px;
+    }
+    .general-error.show { display: block; }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2,6,23,.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+    .overlay.show { display: flex; }
+    .overlay-box {
+      background: rgba(15,23,42,.92);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 18px;
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
       color: #fff;
+      box-shadow: 0 10px 35px rgba(0,0,0,.35);
     }
-    .star-1, .star-2, .star-3, .star-4 {
-      color: darkred;
-      font-weight: bold;
-    }
-    .success {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
-      padding: 12px;
-      border-radius: 4px;
-      margin-bottom: 15px;
-    }
-    .error {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-      padding: 12px;
-      border-radius: 4px;
-      margin-bottom: 15px;
-    }
-    .success, .error {
-      animation: fade 0.3s ease-in;
-    }
-    @keyframes fade {
-      from { opacity: 0; transform: translateY(-5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    </style>
-  </head>
-  <body>
-    
-    <div class="container">
-      
-      <h2>User Signup</h2>
-    {% with messages = get_flashed_messages(with_categories=True) %}
-      {% if messages %}
-        {% for category, msg in messages %}
-          <p class="{{ category }}">{{ msg }}</p>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}  
-      <form action="/submit" method="post">
-        <div class="input-group">
-          <label>Email: <span class="star-1">*</span></label>
-          <input type="email" name="email" value="{{ old.email if old else '' }}" placeholder="Enter email" required>
-        </div>
-        <div class="input-group">
-          <label>Username: <span class="star-2">*</span></label>
-          <input type="text" name="username" value="{{ old.username if old else '' }}" placeholder="Create a username" required>
-        </div>
 
-        <!-- PASSWORD -->
-        <div class="input-group">
-          <label>Password: <span class="star-3">*</span></label>
-          <div style="position: relative;">
-            <input type="password" id="password" name="password" minlength="6" placeholder="Create a password" required>
-            <svg class="eye-btn" onclick="togglePassword('password', this)" viewBox="0 0 24 24" fill="none">
-              <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z" stroke="currentColor" stroke-width="2"/>
-              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-            </svg>
-          </div>
-        </div>
-
-        <!-- CONFIRM PASSWORD -->
-        <div class="input-group">
-          <label>Confirm Password <span class="star-4">*</span></label>
-          <div style="position: relative;">
-            <input type="password" id="confirm_password" name="confirm_password" minlength="6" placeholder="Enter the same password" required>
-            <svg class="eye-btn" onclick="togglePassword('confirm_password', this)" viewBox="0 0 24 24" fill="none">
-              <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z" stroke="currentColor" stroke-width="2"/>
-              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-            </svg>
-          </div>
-        </div>
-
-        <button type="submit">Next</button>
-      </form>
-      <a onclick="goBack(event)" class="back">← back</a>
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="overlay" id="overlay">
+    <div class="overlay-box">
+      <div class="spinner" style="display:inline-block;"></div>
+      <div>Creating account...</div>
     </div>
+  </div>
 
-    <script>
-      function goBack(event) {
-        if (document.referrer) {
-          event.preventDefault();
-          history.back();
-        }
-      }
+  <div class="card">
+    <h2>User Signup</h2>
+    <div class="subtitle">Quick account creation for Onix</div>
 
-      function togglePassword(id, el) {
-        let input = document.getElementById(id);
+    <div class="general-error" id="generalError"></div>
 
-        if (input.type === "password") {
-          input.type = "text";
-          el.innerHTML = `
-            <path d="M17.94 17.94A10.94 10.94 0 0112 19c-6 0-10-6-10-6a21.77 21.77 0 015.06-5.94M9.9 4.24A10.94 10.94 0 0112 5c6 0 10 6 10 6a21.77 21.77 0 01-4.06 5.94M1 1l22 22" stroke="currentColor" stroke-width="2"/>`;
-        } else {
-          input.type = "password";
-          el.innerHTML = `
+    <form id="signupForm" action="/submit" method="post" novalidate>
+      <div class="field">
+        <label for="email_local">Email</label>
+        <div class="email-box">
+          <input type="text" id="email_local" name="email" placeholder="Enter your email" autocomplete="off" />
+          <span class="suffix">@gmail.com</span>
+        </div>
+        <div class="hint-text" id="emailHint">Type only the part before @gmail.com</div>
+        <div class="error-text" id="emailError"></div>
+      </div>
+
+      <div class="field">
+        <label for="username">Username</label>
+        <div class="input-wrap">
+          <input class="input" type="text" id="username" name="username" placeholder="Create a username" autocomplete="username" />
+        </div>
+        <div class="username-check" id="usernameStatus"></div>
+        <div class="error-text" id="usernameError"></div>
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-with-icon">
+          <input class="input" type="password" id="password" name="password" placeholder="Create a password" autocomplete="new-password" />
+          <svg class="eye-btn" onclick="togglePassword('password', this)" viewBox="0 0 24 24" fill="none">
             <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z" stroke="currentColor" stroke-width="2"/>
-            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>`;
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="bars" id="strengthBars"><span></span><span></span><span></span></div>
+        <div class="strength-label" id="strengthLabel">Strength: Weak</div>
+        <div class="error-text" id="passwordError"></div>
+      </div>
+
+      <div class="field">
+        <label for="confirm_password">Confirm Password</label>
+        <div class="input-with-icon">
+          <input class="input" type="password" id="confirm_password" name="confirm_password" placeholder="Enter the same password" autocomplete="new-password" />
+          <svg class="eye-btn" onclick="togglePassword('confirm_password', this)" viewBox="0 0 24 24" fill="none">
+            <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z" stroke="currentColor" stroke-width="2"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="error-text" id="confirmPasswordError"></div>
+      </div>
+
+      <button class="button" id="signupBtn" type="submit">
+        <span class="spinner"></span>
+        <span id="signupBtnText">Create Account</span>
+      </button>
+    </form>
+
+    <a class="footer-link" href="/login-page">Already have an account?</a>
+  </div>
+
+  <script>
+    const form = document.getElementById("signupForm");
+    const overlay = document.getElementById("overlay");
+    const signupBtn = document.getElementById("signupBtn");
+    const signupBtnText = document.getElementById("signupBtnText");
+    const generalError = document.getElementById("generalError");
+    const emailInput = document.getElementById("email_local");
+    const usernameInput = document.getElementById("username");
+    const usernameStatus = document.getElementById("usernameStatus");
+    const passwordInput = document.getElementById("password");
+    const confirmPasswordInput = document.getElementById("confirm_password");
+    const strengthBars = document.getElementById("strengthBars");
+    const strengthLabel = document.getElementById("strengthLabel");
+
+    let usernameTimer = null;
+    let usernameAbort = null;
+
+    function togglePassword(id, el) {
+      const input = document.getElementById(id);
+      if (input.type === "password") {
+        input.type = "text";
+        el.innerHTML = `
+          <path d="M17.94 17.94A10.94 10.94 0 0112 19c-6 0-10-6-10-6a21.77 21.77 0 015.06-5.94M9.9 4.24A10.94 10.94 0 0112 5c6 0 10 6 10 6a21.77 21.77 0 01-4.06 5.94M1 1l22 22" stroke="currentColor" stroke-width="2"/>`;
+      } else {
+        input.type = "password";
+        el.innerHTML = `
+          <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z" stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>`;
+      }
+    }
+
+    function clearErrors() {
+      emailError.textContent = "";
+      usernameError.textContent = "";
+      passwordError.textContent = "";
+      confirmPasswordError.textContent = "";
+      generalError.textContent = "";
+      generalError.classList.remove("show");
+    }
+
+    function setLoading(state) {
+      overlay.classList.toggle("show", state);
+      signupBtn.disabled = state;
+      signupBtn.classList.toggle("loading", state);
+      signupBtnText.textContent = state ? "Creating..." : "Create Account";
+    }
+
+    function showError(id, msg) {
+      document.getElementById(id).textContent = msg || "";
+    }
+
+    function normalizeEmail() {
+      let v = emailInput.value.trim().toLowerCase().replace(/\s+/g, "");
+      v = v.replace(/@gmail\.com$/i, "");
+      emailInput.value = v;
+    }
+
+    function strengthState(pw) {
+      if (!pw) return { cls: "", text: "Strength: Weak" };
+      const len = pw.length;
+      const hasLetter = /[A-Za-z]/.test(pw);
+      const hasNumber = /\d/.test(pw);
+      const hasSymbol = /[^A-Za-z0-9]/.test(pw);
+
+      if (len >= 8 && hasLetter && hasNumber && hasSymbol) return { cls: "strong", text: "Strength: Strong" };
+      if (len >= 6 && hasLetter && hasNumber) return { cls: "medium", text: "Strength: Medium" };
+      return { cls: "weak", text: "Strength: Weak" };
+    }
+
+    function updateStrength() {
+      const s = strengthState(passwordInput.value);
+      strengthBars.className = "bars " + s.cls;
+      strengthLabel.textContent = s.text;
+    }
+
+    async function checkUsername() {
+      const u = usernameInput.value.trim();
+      if (usernameAbort) usernameAbort.abort();
+
+      if (!u) {
+        usernameStatus.textContent = "";
+        usernameStatus.className = "username-check";
+        return;
+      }
+
+      if (u.length < 3) {
+        usernameStatus.textContent = "Username should be at least 3 characters.";
+        usernameStatus.className = "username-check status-bad";
+        return;
+      }
+
+      usernameStatus.textContent = "Checking...";
+      usernameStatus.className = "username-check";
+
+      usernameAbort = new AbortController();
+      try {
+        const res = await fetch("/check-username?username=" + encodeURIComponent(u), {
+          signal: usernameAbort.signal
+        });
+        const data = await res.json();
+        usernameStatus.textContent = data.available ? "Username available" : "Username already taken";
+        usernameStatus.className = "username-check " + (data.available ? "status-ok" : "status-bad");
+      } catch (e) {
+        if (e.name !== "AbortError") {
+          usernameStatus.textContent = "";
+          usernameStatus.className = "username-check";
         }
       }
-    </script>
-  </body>
+    }
+
+    emailInput.addEventListener("input", normalizeEmail);
+    emailInput.addEventListener("blur", normalizeEmail);
+
+    usernameInput.addEventListener("input", () => {
+      clearTimeout(usernameTimer);
+      usernameTimer = setTimeout(checkUsername, 250);
+    });
+
+    passwordInput.addEventListener("input", updateStrength);
+    updateStrength();
+
+    function clientValidate() {
+      let ok = true;
+      const email = emailInput.value.trim().toLowerCase().replace(/\s+/g, "");
+      const username = usernameInput.value.trim();
+      const pw = passwordInput.value;
+      const cpw = confirmPasswordInput.value;
+
+      if (!email) { showError("emailError", "Enter the part before @gmail.com."); ok = false; }
+      else if (!/^[a-zA-Z0-9._%+-]+$/.test(email)) { showError("emailError", "Use only letters, numbers, dots, underscores and -."); ok = false; }
+
+      if (!username) { showError("usernameError", "Create a username."); ok = false; }
+      else if (username.length < 3) { showError("usernameError", "Username must be at least 3 characters."); ok = false; }
+      else if (!/^[a-zA-Z0-9._]+$/.test(username)) { showError("usernameError", "Use only letters, numbers, dots, and underscores."); ok = false; }
+
+      if (pw.length < 6) { showError("passwordError", "Password must be at least 6 characters."); ok = false; }
+      else if (!(/[A-Za-z]/.test(pw) && /\d/.test(pw))) { showError("passwordError", "Use letters and at least one number."); ok = false; }
+
+      if (pw !== cpw) { showError("confirmPasswordError", "Passwords do not match."); ok = false; }
+
+      return ok;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearErrors();
+      normalizeEmail();
+      updateStrength();
+
+      if (!clientValidate()) return;
+
+      setLoading(true);
+      try {
+        const res = await fetch(form.action, {
+          method: "POST",
+          body: new FormData(form),
+          headers: { "X-Requested-With": "fetch" }
+        });
+
+        const data = await res.json();
+
+        if (data.ok) {
+          window.location.href = data.redirect;
+          return;
+        }
+
+        if (data.errors) {
+          if (data.errors.email) showError("emailError", data.errors.email);
+          if (data.errors.username) showError("usernameError", data.errors.username);
+          if (data.errors.password) {
+            showError("passwordError", data.errors.password);
+            passwordInput.value = "";
+            updateStrength();
+          }
+          if (data.errors.confirm_password) showError("confirmPasswordError", data.errors.confirm_password);
+          if (data.errors.general) {
+            generalError.textContent = data.errors.general;
+            generalError.classList.add("show");
+          }
+        }
+      } catch (err) {
+        generalError.textContent = "Something went wrong. Please try again.";
+        generalError.classList.add("show");
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
 </html>
