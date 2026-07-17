@@ -1,0 +1,361 @@
+/* ── Mode toggle (Task / Chat) ───────────────────────── */
+.mode-toggle {
+  display: flex;
+  background: #1e293b;
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+  flex: 1;
+  max-width: 180px;
+  margin: 0 auto;
+}
+.mode-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.mode-btn.active {
+  background: #38bdf8;
+  color: #0f172a;
+}
+.mode-btn:not(.active):hover {
+  background: #334155;
+  color: #94a3b8;
+}
+
+/* ── Task panel ──────────────────────────────────────── */
+.task-panel {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  padding: 20px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.task-panel-toprow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.task-panel-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.task-panel-icon-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.task-panel-icon { font-size: 20px; }
+.task-panel-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+.task-panel-sub {
+  font-size: 12px;
+  color: #475569;
+  padding-left: 2px;
+}
+.task-state-chip {
+  flex-shrink: 0;
+}
+.task-state-select {
+  background: #0f172a;
+  color: #64748b;
+  border: 1px solid #1e3a5f;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-family: Arial, sans-serif;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+.task-state-select:focus {
+  border-color: #38bdf8;
+}
+.task-service-select {
+  width: 100%;
+  background: #0f172a;
+  color: #f1f5f9;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 16px 16px;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.task-service-select:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56,189,248,0.15);
+}
+.task-research-btn {
+  width: 100%;
+  background: #38bdf8;
+  color: #0f172a;
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.task-research-btn:hover { background: #7dd3fc; }
+.task-research-btn:active { transform: scale(0.97); }
+.task-research-btn:disabled {
+  background: #1e293b;
+  color: #475569;
+  border: 1px solid #334155;
+  cursor: not-allowed;
+}
+
+/* ── Custom dropdown (modern, dark-mode) ─────────────────
+   Replaces native <select> UI for state + service pickers.
+   The original .task-state-select / .task-service-select
+   elements still exist (hidden) so existing JS reading
+   `.value` keeps working untouched. ──────────────────── */
+.onix-dd { position: relative; }
+
+.onix-dd-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #0f172a;
+  color: #f1f5f9;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 16px 16px;
+  font-size: 16px;
+  font-family: Arial, sans-serif;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.onix-dd-trigger:hover { border-color: #475569; }
+.onix-dd.open .onix-dd-trigger {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56,189,248,0.15);
+}
+.onix-dd-trigger-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #f1f5f9;
+}
+.onix-dd-trigger-label.placeholder { color: #64748b; }
+.onix-dd-chevron {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: #64748b;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+.onix-dd.open .onix-dd-chevron { transform: rotate(180deg); color: #38bdf8; }
+
+.onix-dd-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  background: #16202e;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  box-shadow: 0 16px 36px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.3);
+  z-index: 60;
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  overflow: hidden;
+}
+.onix-dd.open .onix-dd-menu {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.onix-dd-list {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 6px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+.onix-dd-list::-webkit-scrollbar { width: 6px; }
+.onix-dd-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+/* Service dropdown only: centered modal-style popup, bigger than
+   the default anchored popover, with a dimmed backdrop. */
+.onix-dd-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4,9,18,0.6);
+  z-index: 90;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+.onix-dd-backdrop.show { opacity: 1; pointer-events: auto; }
+
+.onix-dd-service .onix-dd-menu {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  right: auto;
+  width: min(92vw, 440px);
+  max-height: min(76vh, 560px);
+  transform: translate(-50%, -50%) scale(0.97);
+  border-radius: 18px;
+  z-index: 95;
+  display: flex;
+  flex-direction: column;
+}
+.onix-dd-service.open .onix-dd-menu {
+  transform: translate(-50%, -50%) scale(1);
+}
+.onix-dd-service .onix-dd-list { max-height: none; flex: 1; min-height: 0; }
+.onix-dd-service .onix-dd-search { font-size: 16px; } /* avoid mobile zoom-on-focus */
+
+.onix-dd-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #263244;
+}
+.onix-dd-search-wrap svg { flex-shrink: 0; color: #64748b; width: 16px; height: 16px; }
+.onix-dd-search {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  color: #f1f5f9;
+  font-size: 14px;
+  font-family: Arial, sans-serif;
+}
+.onix-dd-search::placeholder { color: #475569; }
+
+.onix-dd-group-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #475569;
+  padding: 12px 10px 6px;
+}
+.onix-dd-list > .onix-dd-group-label:first-child { padding-top: 8px; }
+
+.onix-dd-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+.onix-dd-option:hover { background: #1e293b; }
+.onix-dd-option.selected { background: rgba(56,189,248,0.12); }
+.onix-dd-option-icon { font-size: 17px; flex-shrink: 0; width: 22px; text-align: center; }
+.onix-dd-option-text { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+.onix-dd-option-title {
+  font-size: 14px;
+  color: #f1f5f9;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.onix-dd-option-sub { font-size: 11px; color: #64748b; }
+.onix-dd-check { color: #38bdf8; font-size: 14px; opacity: 0; flex-shrink: 0; }
+.onix-dd-option.selected .onix-dd-check { opacity: 1; }
+.onix-dd-empty { padding: 20px 12px; text-align: center; color: #475569; font-size: 13px; }
+
+/* Drill-down indicator for services/variants that expand into sub-choices
+   instead of resolving immediately (e.g. Aadhaar Card -> Update -> ...) */
+.onix-dd-drill-arrow {
+  color: #64748b;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.onix-dd-option:hover .onix-dd-drill-arrow { color: #38bdf8; }
+
+/* Back button + breadcrumb shown above the list while drilled into a
+   variant tree, so the user can step back a level without closing
+   the whole dropdown. */
+.onix-dd-drill-header {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 10px;
+  border-bottom: 1px solid #1e293b;
+  margin-bottom: 4px;
+}
+.onix-dd-drill-back {
+  background: #1e293b;
+  border: none;
+  color: #38bdf8;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.onix-dd-drill-back:hover { background: #263244; }
+.onix-dd-drill-crumb {
+  font-size: 12px;
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Compact pill variant for the state/central switcher */
+.onix-dd-state { width: auto; }
+.onix-dd-state .onix-dd-trigger {
+  width: auto;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  gap: 6px;
+  border-color: #1e3a5f;
+}
+.onix-dd-state .onix-dd-chevron { width: 12px; height: 12px; }
+.onix-dd-state .onix-dd-menu { left: auto; right: 0; min-width: 220px; top: calc(100% + 6px); }
+
+/* ── Task result area ────────────────────────────────── */
+#task-result .ai-bubble {
+  max-width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+}
+#task-result .research-card {
+  margin-top: 0;
+}
