@@ -9,7 +9,7 @@ from routes.task import task_bp
 from routes.data import data_bp
 
 app = Flask(__name__)
-app.secret_key = "mysecretkey"
+app.secret_key = os.environ.get("SECRET_KEY")
 
 create_tables()
 
