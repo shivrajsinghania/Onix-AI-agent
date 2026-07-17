@@ -1,180 +1,278 @@
-<!DOCTYPE html>  
-<html>  
-  <head>  
-    <style>  
-      * {  
-        margin: 0;  
-        padding: 0;  
-        box-sizing: border-box;  
-        font-family: "Segoe UI", sans-serif;  
-      }  
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - Onix</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", sans-serif;
+      }
 
-      body {  
-        background: linear-gradient(135deg, #0f172a, #1e293b);  
-        color: #fff;  
-        display: flex;  
-        justify-content: center;  
-        align-items: center;  
-        min-height: 100vh;  
-      }  
-      main {
-        width: 100%;
+      body {
+        min-height: 100vh;
         display: flex;
         justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        color: #fff;
+        padding: 20px;
       }
-      section {
+
+      .card {
         width: 100%;
-        max-width: 380px;
-        background: rgba(255,255,255,0.05);
-        backdrop-filter: blur(15px);
-        border-radius: 20px;
-        padding: 25px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-        border: none;
+        max-width: 390px;
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 22px;
+        padding: 24px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
       }
-      .loginhead {  
-        text-align: center;  
-        margin-bottom: 20px;  
-      }  
 
-      .input-wrap {  
-        margin-bottom: 15px;  
-      }  
+      h2 {
+        text-align: center;
+        margin-bottom: 8px;
+        font-size: 28px;
+        font-weight: 700;
+      }
 
-      label {  
-        font-size: 13px;  
-        color: #aaa;  
-        display: block;  
-        margin-bottom: 5px;  
-      }  
+      .subtitle {
+        text-align: center;
+        color: #aab4c5;
+        font-size: 13px;
+        margin-bottom: 22px;
+      }
 
-      .field {  
-        position: relative;  
-      }  
+      .field {
+        margin-bottom: 16px;
+      }
 
-      input {  
-        width: 100%;  
-        padding: 10px;  
-        padding-right: 42px;  
-        border-radius: 10px;  
-        border: none;  
-        outline: none;  
-        background: rgba(255,255,255,0.08);  
-        color: #fff;  
-        font-size: 14px;  
-        display: block;  
-      }  
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: #aab4c5;
+      }
 
-      input::placeholder {  
-        color: #aaa;  
-      }  
+      .input-wrap {
+        position: relative;
+      }
 
-      .eye-btn {  
-        position: absolute;  
-        right: 12px;  
-        top: 50%;  
-        transform: translateY(-50%);  
-        width: 18px;  
-        height: 18px;  
-        cursor: pointer;  
-        color: #aaa;  
-        display: block;  
-      }  
+      input {
+        width: 100%;
+        padding: 12px 42px 12px 14px;
+        border: none;
+        outline: none;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+        font-size: 14px;
+        transition: 0.2s ease;
+      }
 
-      .eye-btn:hover {  
-        color: #fff;  
-      }  
+      input:focus {
+        background: rgba(255, 255, 255, 0.11);
+        box-shadow: 0 0 0 2px rgba(77, 166, 255, 0.25);
+      }
 
-      button {  
-        width: 100%;  
-        padding: 12px;  
-        border-radius: 25px;  
-        border: none;  
-        background: linear-gradient(135deg, #4da6ff, #0066ff);  
-        color: white;  
-        font-size: 14px;  
-        cursor: pointer;  
-        transition: 0.3s;  
-        margin-top: 5px;  
-      }  
+      input::placeholder {
+        color: #96a2b6;
+      }
 
-      button:hover {  
-        transform: scale(1.03);  
-        box-shadow: 0 5px 15px rgba(0,102,255,0.5);  
-      }  
+      .eye-btn {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        color: #aab4c5;
+        cursor: pointer;
+      }
 
-      .success {  
-        background-color: #d4edda;  
-        color: #155724;  
-        border: 1px solid #c3e6cb;  
-        padding: 12px;  
-        border-radius: 4px;  
-        margin-bottom: 15px;  
-      }  
+      .eye-btn:hover {
+        color: #fff;
+      }
 
-      .error {  
-        background-color: #f8d7da;  
-        color: #721c24;  
-        border: 1px solid #f5c6cb;  
-        padding: 12px;  
-        border-radius: 4px;  
-        margin-bottom: 15px;  
-      }  
+      .error-text {
+        min-height: 18px;
+        margin-top: 6px;
+        font-size: 12px;
+        color: #ff9aa6;
+      }
 
-      .success, .error {  
-        animation: fade 0.3s ease-in;  
-      }  
+      .button {
+        width: 100%;
+        margin-top: 6px;
+        padding: 12px 14px;
+        border: none;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #4da6ff, #0066ff);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
 
-      @keyframes fade {  
-        from { opacity: 0; transform: translateY(-5px); }  
-        to { opacity: 1; transform: translateY(0); }  
-      }  
-    </style>  
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
-    <title>Login-page</title>  
-  </head>  
-  <body>  
-    <main>  
-      <section>  
-        <div class="loginhead">  
-          <h2>Login</h2>  
-        </div>  
+      .button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(0, 102, 255, 0.3);
+      }
 
-        {% with messages = get_flashed_messages(with_categories=True) %}  
-          {% if messages %}  
-            {% for category, msg in messages %}  
-              <p class="{{ category }}">{{ msg }}</p>  
-            {% endfor %}  
-          {% endif %}  
-        {% endwith %}    
+      .button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
 
-        <div>  
-          <form action="/login" method="post">  
-            <div class="input-wrap">  
-              <label>Enter a username: </label>  
-              <input type="text" name="username" placeholder="Enter a username" required>  
-            </div>  
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        display: none;
+      }
 
-            <div class="input-wrap">  
-              <label>Enter a password: </label>  
-              <div class="field">
-                <input type="password" id="login_password" name="password" minlength="6" placeholder="Enter a password" required>  
-                <svg class="eye-btn" onclick="togglePassword('login_password', this)" viewBox="0 0 24 24" fill="none">
-                  <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z" stroke="currentColor" stroke-width="2"/>
-                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-                </svg>
-              </div>
-            </div>  
+      .loading .spinner {
+        display: inline-block;
+      }
 
-            <button type="submit">Login</button>  
-          </form>  
-        </div>  
-      </section>  
-    </main>  
+      .footer-link {
+        display: block;
+        text-align: center;
+        margin-top: 14px;
+        color: #aab4c5;
+        text-decoration: none;
+        font-size: 13px;
+      }
 
-    <script>  
+      .footer-link:hover {
+        color: #fff;
+      }
+
+      .general-error {
+        display: none;
+        margin-bottom: 12px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(255, 90, 90, 0.12);
+        border: 1px solid rgba(255, 90, 90, 0.2);
+        color: #ffb4bd;
+        font-size: 13px;
+      }
+
+      .general-error.show {
+        display: block;
+      }
+
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+      }
+
+      .overlay.show {
+        display: flex;
+      }
+
+      .overlay-box {
+        background: rgba(15, 23, 42, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        padding: 18px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #fff;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35);
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="overlay" id="overlay">
+      <div class="overlay-box">
+        <div class="spinner" style="display:inline-block;"></div>
+        <div>Logging in...</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Login</h2>
+      <div class="subtitle">Welcome back to Onix</div>
+
+      <div class="general-error" id="generalError"></div>
+
+      <form id="loginForm" action="/login" method="post" novalidate>
+        <div class="field">
+          <label for="username">Username</label>
+          <div class="input-wrap">
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Enter username"
+              autocomplete="username"
+            />
+          </div>
+          <div class="error-text" id="usernameError"></div>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter password"
+              autocomplete="current-password"
+            />
+            <svg class="eye-btn" onclick="togglePassword('password', this)" viewBox="0 0 24 24" fill="none">
+              <path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6-10-6-10-6z" stroke="currentColor" stroke-width="2"/>
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="error-text" id="passwordError"></div>
+        </div>
+
+        <button class="button" id="loginBtn" type="submit">
+          <span class="spinner"></span>
+          <span id="loginBtnText">Login</span>
+        </button>
+      </form>
+
+      <a class="footer-link" href="/signup">Create a new account</a>
+    </div>
+
+    <script>
+      const form = document.getElementById("loginForm");
+      const overlay = document.getElementById("overlay");
+      const loginBtn = document.getElementById("loginBtn");
+      const loginBtnText = document.getElementById("loginBtnText");
+      const generalError = document.getElementById("generalError");
+
       function togglePassword(id, el) {
-        let input = document.getElementById(id);
+        const input = document.getElementById(id);
 
         if (input.type === "password") {
           input.type = "text";
@@ -187,6 +285,88 @@
             <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>`;
         }
       }
-    </script>  
-  </body>  
+
+      function clearErrors() {
+        document.getElementById("usernameError").textContent = "";
+        document.getElementById("passwordError").textContent = "";
+        generalError.textContent = "";
+        generalError.classList.remove("show");
+      }
+
+      function setLoading(state) {
+        overlay.classList.toggle("show", state);
+        loginBtn.disabled = state;
+        loginBtn.classList.toggle("loading", state);
+        loginBtnText.textContent = state ? "Logging in..." : "Login";
+      }
+
+      function showFieldError(field, message) {
+        const el = document.getElementById(field + "Error");
+        if (el) el.textContent = message || "";
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearErrors();
+
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+
+        let hasError = false;
+
+        if (!username) {
+          showFieldError("username", "Enter your username.");
+          hasError = true;
+        }
+
+        if (!password) {
+          showFieldError("password", "Enter your password.");
+          hasError = true;
+        }
+
+        if (hasError) return;
+
+        setLoading(true);
+
+        try {
+          const formData = new FormData(form);
+
+          const response = await fetch(form.action, {
+            method: "POST",
+            body: formData,
+            headers: {
+              "X-Requested-With": "fetch"
+            }
+          });
+
+          const data = await response.json();
+
+          if (data.ok) {
+            window.location.href = data.redirect;
+            return;
+          }
+
+          if (data.errors) {
+            if (data.errors.username) showFieldError("username", data.errors.username);
+
+            if (data.errors.password) {
+              showFieldError("password", data.errors.password);
+              document.getElementById("password").value = "";
+              document.getElementById("password").focus();
+            }
+
+            if (data.errors.general) {
+              generalError.textContent = data.errors.general;
+              generalError.classList.add("show");
+            }
+          }
+        } catch (err) {
+          generalError.textContent = "Something went wrong. Please try again.";
+          generalError.classList.add("show");
+        } finally {
+          setLoading(false);
+        }
+      });
+    </script>
+  </body>
 </html>
