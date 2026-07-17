@@ -1,0 +1,238 @@
+:root {
+  --bg: #0f172a;
+  --panel: #1e293b;
+  --panel-2: #16202e;
+  --border: #334155;
+  --border-soft: #263244;
+  --text: #f1f5f9;
+  --muted: #64748b;
+  --muted-2: #475569;
+  --accent: #38bdf8;
+  --accent-soft: rgba(56,189,248,0.12);
+  --danger: #f87171;
+  --success: #4ade80;
+}
+* { box-sizing: border-box; }
+body {
+  font-family: Arial, system-ui, sans-serif;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+.wrap { max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; }
+
+.top {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 14px; flex-wrap: wrap;
+}
+.top h2 { margin: 0; font-size: 22px; }
+.muted { color: var(--muted); font-size: 13px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--panel); color: var(--text);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 9px 14px; font-size: 14px; font-weight: 600;
+  cursor: pointer; text-decoration: none; transition: background .12s, border-color .12s;
+}
+.btn:hover { background: #263244; border-color: #475569; }
+.btn-accent { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+.btn-accent:hover { background: #7dd3fc; }
+.btn-danger { color: var(--danger); }
+.btn-ghost { background: none; border-color: transparent; padding: 6px 10px; }
+.btn-sm { padding: 6px 10px; font-size: 12.5px; }
+.actions-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.card {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 16px; padding: 18px; margin-top: 16px;
+}
+.grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 900px) { .grid { grid-template-columns: 1fr 2fr; } }
+
+.filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.filters input, .filters select {
+  background: var(--bg); color: var(--text); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 12px; font-size: 14px; outline: none;
+}
+.filters input:focus, .filters select:focus { border-color: var(--accent); }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px; border-bottom: 1px solid var(--border-soft); vertical-align: top; text-align: left; font-size: 14px; }
+th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+tr.inactive-row td { opacity: 0.45; }
+.pill {
+  display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 11.5px; font-weight: 700;
+  background: var(--accent-soft); color: var(--accent);
+}
+.pill-central { background: rgba(167,139,250,0.15); color: #a78bfa; }
+.pill-inactive { background: rgba(248,113,113,0.12); color: var(--danger); }
+.pill-confidence-high { background: rgba(74,222,128,0.14); color: #4ade80; }
+.pill-confidence-mid { background: rgba(250,204,21,0.14); color: #facc15; }
+.pill-confidence-low { background: rgba(248,113,113,0.12); color: var(--danger); }
+.pill-variants { background: rgba(56,189,248,0.14); color: var(--accent); }
+.empty-msg { color: var(--muted); padding: 20px 4px; text-align: center; }
+
+ul.review-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+ul.review-list li { font-size: 13.5px; border-bottom: 1px dashed var(--border-soft); padding-bottom: 8px; }
+
+/* ── Modal overlay (single-page add/edit, no reload) ─── */
+.modal-bg {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+  z-index: 200; align-items: flex-start; justify-content: center; padding: 30px 14px;
+  overflow-y: auto;
+}
+.modal-bg.open { display: flex; }
+.modal-box {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 18px;
+  width: 100%; max-width: 880px; padding: 22px; margin-bottom: 40px;
+  animation: modalIn .15s ease;
+}
+@keyframes modalIn { from { opacity:0; transform: translateY(-8px); } to { opacity:1; transform: translateY(0); } }
+.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.modal-head h3 { margin: 0; font-size: 19px; }
+.modal-subtitle { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 760px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.full { grid-column: 1 / -1; }
+.field label { font-size: 13px; font-weight: 700; color: #cbd5e1; }
+.field .hint { font-size: 11.5px; color: var(--muted); font-weight: 400; }
+.field input[type=text], .field input[type=url], .field input[type=number],
+.field input[type=date], .field select, .field textarea {
+  background: var(--bg); color: var(--text); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 12px; font-size: 14px; outline: none; width: 100%;
+  font-family: Arial, sans-serif;
+}
+.field textarea {
+  resize: none;
+  overflow: hidden;
+  line-height: 1.5;
+  min-height: 40px;
+  box-sizing: border-box;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+.field .req { color: var(--danger); }
+
+/* A field the admin hasn't touched yet in variant mode, still showing
+   the inherited parent value — subtle left accent so it's clear at a
+   glance which fields are "inherited" vs explicitly set here. */
+.field.inherited input, .field.inherited select, .field.inherited textarea {
+  border-left: 3px solid var(--accent);
+}
+.field .inherited-tag {
+  font-size: 10.5px; color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+}
+
+.section-label {
+  font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--muted); margin: 4px 0 -4px; grid-column: 1 / -1;
+}
+
+/* chip builder for documents / sources */
+.chip-add-row { display: flex; gap: 8px; }
+.chip-add-row input { flex: 1; }
+.chip-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; min-height: 20px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent-soft); color: var(--text); border: 1px solid #1e3a5f;
+  border-radius: 20px; padding: 5px 6px 5px 12px; font-size: 12.5px;
+}
+.chip-remove {
+  background: none; border: none; color: var(--muted); cursor: pointer; font-size: 12px;
+  width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+}
+.chip-remove:hover { background: #334155; color: var(--text); }
+.chip-empty { color: var(--muted-2); font-size: 12.5px; }
+
+/* numbered list builder for steps */
+.step-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.step-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: var(--bg); border: 1px solid var(--border-soft); border-radius: 10px; padding: 8px 10px;
+}
+.step-num {
+  flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--accent-soft);
+  color: var(--accent); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  margin-top: 1px;
+}
+.step-text { flex: 1; font-size: 13.5px; line-height: 1.4; }
+
+/* variants tree (inside the modal, for browsing/adding under a service) */
+.variants-breadcrumb {
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  font-size: 12px; color: var(--muted); margin-bottom: 8px; min-height: 16px;
+}
+.variants-breadcrumb button {
+  background: none; border: none; color: var(--accent); cursor: pointer; font-size: 12px; padding: 0;
+}
+.variants-breadcrumb button:hover { text-decoration: underline; }
+.variants-tree { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; min-height: 20px; }
+.variant-row {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg); border: 1px solid var(--border-soft); border-radius: 10px; padding: 8px 10px;
+}
+.variant-row-label { flex: 1; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.variant-row-label:hover { color: var(--accent); }
+.variant-child-badge {
+  font-size: 10.5px; color: var(--muted); background: var(--panel-2);
+  border-radius: 10px; padding: 2px 7px; flex-shrink: 0;
+}
+.variant-row-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.variant-row-actions button {
+  background: none; border: none; color: var(--muted); cursor: pointer; font-size: 13px;
+  width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+}
+.variant-row-actions button:hover { background: #334155; color: var(--text); }
+.variant-row-actions .variant-delete:hover { color: var(--danger); }
+.variant-add-row { display: flex; gap: 8px; }
+.variant-add-row input { flex: 1; }
+.variants-empty { color: var(--muted-2); font-size: 12.5px; padding: 4px 2px; }
+
+/* ── Grouped rows in the main services table ─── */
+/* Parent rows with variants get an expand chevron; expanding reveals
+   indented child rows fetched from /admin/api/service/<key>/variants.
+   Each child row's own "Edit" opens the same modal in variant mode. */
+tr.service-row-parent td:first-child { cursor: pointer; }
+.expand-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; margin-right: 6px; color: var(--muted);
+  transition: transform .12s;
+}
+tr.expanded .expand-toggle { transform: rotate(90deg); color: var(--accent); }
+tr.variant-child-row td { background: var(--panel-2); }
+tr.variant-child-row td:first-child { padding-left: 34px; }
+.variant-child-name { display: flex; align-items: center; gap: 6px; font-size: 13.5px; }
+.variant-tree-glyph { color: var(--muted-2); font-size: 13px; }
+.variant-child-loading, .variant-child-empty {
+  color: var(--muted); font-size: 12.5px; font-style: italic;
+}
+
+.toggle-row { display: flex; align-items: center; gap: 10px; }
+.switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch-track {
+  position: absolute; inset: 0; background: #334155; border-radius: 20px; cursor: pointer; transition: background .15s;
+}
+.switch-track::before {
+  content: ""; position: absolute; width: 16px; height: 16px; left: 3px; top: 3px;
+  background: #f1f5f9; border-radius: 50%; transition: transform .15s;
+}
+.switch input:checked + .switch-track { background: var(--accent); }
+.switch input:checked + .switch-track::before { transform: translateX(18px); }
+
+.modal-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; gap: 10px; flex-wrap: wrap; }
+.save-hint { font-size: 12.5px; color: var(--muted); }
+
+.toast {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+  background: var(--panel); border: 1px solid var(--border); color: var(--text);
+  padding: 11px 18px; border-radius: 10px; font-size: 13.5px; z-index: 300;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4); opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.toast.show { opacity: 1; }
+.toast.error { border-color: var(--danger); color: var(--danger); }
+.toast.success { border-color: var(--success); color: var(--success); }
+
+datalist { display: none; }
