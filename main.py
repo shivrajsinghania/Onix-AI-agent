@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request
 from config.database import create_tables
 
