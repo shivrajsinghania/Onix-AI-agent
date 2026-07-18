@@ -61,11 +61,17 @@
     <div class="modal-box">
       <div class="modal-head">
         <div>
-            <h3 id="modalTitle">Add Service</h3>
-            <div id="modalSubtitle" class="modal-subtitle"></div>
+          <h3 id="modalTitle">Add Service</h3>
+          <div id="modalSubtitle" class="modal-subtitle"></div>
         </div>
-        <button class="btn btn-ghost" onclick="closeModal()">✕</button>
+        <!-- Added Export/Import buttons right next to the close button -->
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <button class="btn btn-ghost btn-sm" onclick="exportFormData()" title="Export to Clipboard">📤</button>
+          <button class="btn btn-ghost btn-sm" onclick="importFormData()" title="Import from Clipboard">📥</button>
+          <button class="btn btn-ghost" onclick="closeModal()">✕</button>
+        </div>
       </div>
+
 
       <div class="form-grid">
         <div class="field full">
