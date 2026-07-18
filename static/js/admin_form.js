@@ -477,3 +477,55 @@ document.addEventListener("DOMContentLoaded", function() {
     if (e.target.classList.contains("auto-grow")) autoGrow(e.target)
   })
 })
+
+
+// ─── Export / Import Functionality ────────────────────────
+function exportFormData() {
+  // 1. Collect all input field data at once
+  let data = collectPayload();
+  
+  // 2. Strip system IDs so they don't clash across local/deployed DBs
+  delete data.service_key;
+  delete data.id;
+  delete data.mode;
+  
+  let jsonStr = JSON.stringify(data, null, 2);
+  
+  // 3. Smart Clipboard copy with instant Pydroid/Mobile fallback
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(jsonStr)
+      .then(() => showToast("Form copied to clipboard!", "success"))
+      .catch(() => fallbackCopyPrompt(jsonStr));
+  } else {
+    fallbackCopyPrompt(jsonStr);
+  }
+}
+
+function fallbackCopyPrompt(text) {
+  // Safeguard: Opens a native dialogue allowing easy select-all/copy on mobile
+  prompt("Copy this export string:", text);
+}
+
+function importFormData() {
+  let jsonStr = prompt("Paste your Onix service JSON string here:");
+  if (!jsonStr || !jsonStr.trim()) return;
+  
+  try {
+    let data = JSON.parse(jsonStr);
+    
+    // 1. Run your existing form population engine
+    populateForm(data);
+    
+    // 2. FORCE FIX FOR PYDROID MOBILE: Auto-grow all textareas instantly
+    document.querySelectorAll(".modal-box .auto-grow").forEach(el => {
+      if (typeof autoGrow === "function") {
+        autoGrow(el);
+      }
+    });
+    
+    showToast("Data imported successfully!", "success");
+  } catch (e) {
+    showToast("Import failed. Invalid data structure.", "error");
+    console.error("Onix Import Error:", e);
+  }
+}
